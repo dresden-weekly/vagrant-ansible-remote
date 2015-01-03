@@ -16,16 +16,16 @@ fi
 if [ ! -z $ENV ]; then
   COMMAND="$ENV $COMMAND"
 fi
-COMMAND=vagrant ssh --command "sudo $COMMAND"
+COMMAND="vagrant ssh --command \"sudo $COMMAND\""
 
-vagrant status | read ; while read first second third fourth; do
-  if [ ! -z $fourth ]; then
+vagrant status | (read ; while read -a token; do
+  if [ ! -z ${token[5]} ]; then
     break
   fi
-  if [ ! "$second" == "running" ]; then
+  if [ ! "${token[1]}" == "running" ]; then
     vagrant up
     break
   fi
-done
+done)
 
 $COMMAND 2>/dev/null
