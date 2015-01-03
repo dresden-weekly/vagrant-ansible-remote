@@ -16,7 +16,7 @@ fi
 if [ ! -z $ENV ]; then
   COMMAND="$ENV $COMMAND"
 fi
-COMMAND=vagrant ssh --command "sudo %COMMAND%"
+COMMAND=vagrant ssh --command "sudo $COMMAND"
 
 vagrant status | read ; while read first second third fourth; do
   if [ ! -z $fourth ]; then
@@ -28,4 +28,4 @@ vagrant status | read ; while read first second third fourth; do
   fi
 done
 
-%COMMAND% 2>/dev/null
+$COMMAND 2>/dev/null
