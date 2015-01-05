@@ -12,10 +12,4 @@ Vagrant.configure('2') do |config|
     v.memory = 1024
     v.cpus = 2
   end
-
-  vagrant_ansible_remote = ENV['VAGRANT_ANSIBLE_REMOTE']
-  if vagrant_ansible_remote
-    require_relative "#{vagrant_ansible_remote}/vagrant/provision.rb"
-    VagrantAnsibleRemote.provision
-  end
 end
