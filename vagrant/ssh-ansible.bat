@@ -5,6 +5,8 @@ SETLOCAL ENABLEEXTENSIONS
 :: configuration options
 :: =====================
 ::
+:: PROJECT_FOLDER (default: "%CD%")
+::   Absolute path of the Project (containing the Vagrantfile)
 :: VAGRANT_ANSIBLE_MACHINE (default: "default")
 ::   Vagrant name of the machine with Ansible
 :: ANSIBLE_ENV
@@ -25,6 +27,9 @@ SETLOCAL ENABLEEXTENSIONS
 ::   Path of the invokated script relative to vagrant-ansible-remote
 
 :: --- option defaults ---
+if not defined PROJECT_FOLDER (
+  set "PROJECT_FOLDER=%CD%"
+)
 if not defined VAGRANT_ANSIBLE_MACHINE (
   set "VAGRANT_ANSIBLE_MACHINE=default"
 )
@@ -38,17 +43,13 @@ if not defined VAGRANT_ANSIBLE_REMOTE (
 ::  set "VAGRANT_ANSIBLE_INVOKE_PREFIX=sudo"
 ::)
 if not defined VAGRANT_ANSIBLE_INVOKE_SCRIPT (
-  set "VAGRANT_ANSIBLE_INVOKE_SCRIPT=vagrant/invoke-ansible.sh"
+  set "VAGRANT_ANSIBLE_INVOKE_SCRIPT=remote.sh"
 )
 
-:: --- derived values ---
-set REMOTE_VAGRANT_ANSIBLE_REMOTE=%VAGRANT_PROJECT_MOUNT%/%VAGRANT_ANSIBLE_REMOTE%
-set INVOKE_ANSIBLE=%REMOTE_VAGRANT_ANSIBLE_REMOTE%/%VAGRANT_ANSIBLE_INVOKE_SCRIPT%
-
 :: --- build the command ---
-set "COMMAND=/bin/bash %INVOKE_ANSIBLE% %*"
+set "COMMAND=/bin/bash %VAGRANT_PROJECT_MOUNT%/%VAGRANT_ANSIBLE_INVOKE_SCRIPT% %*"
 set "COMMAND=VAGRANT_INVOKED=true %COMMAND%"
-set "COMMAND=VAGRANT_ANSIBLE_REMOTE=%REMOTE_VAGRANT_ANSIBLE_REMOTE:\=/% %COMMAND%"
+set "COMMAND=VAGRANT_ANSIBLE_REMOTE=%VAGRANT_ANSIBLE_REMOTE:\=/% %COMMAND%"
 set "COMMAND=PROJECT_FOLDER=%VAGRANT_PROJECT_MOUNT:\=/% %COMMAND%"
 if defined ANSIBLE_ENV (
   set "COMMAND=%ANSIBLE_ENV% %COMMAND%"
@@ -59,6 +60,9 @@ if defined VAGRANT_ANSIBLE_INVOKE_PREFIX (
 if defined VAGRANT_SSH_ARGS (
   set "VAGRANT_SSH_ARGS= -- %VAGRANT_SSH_ARGS%"
 )
+
+:: --- vagrant requires to be in the folder ---
+pushd %PROJECT_FOLDER%
 
 :: --- check that all vagrant machines are up ---
 for /F "skip=1 tokens=2,5" %%A in ('vagrant status') do (
@@ -73,4 +77,5 @@ for /F "skip=1 tokens=2,5" %%A in ('vagrant status') do (
 :: --- run the command ---
 vagrant ssh %VAGRANT_ANSIBLE_MACHINE% --command "%COMMAND%"%VAGRANT_SSH_ARGS% 2>nul
 
+popd
 ENDLOCAL

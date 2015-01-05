@@ -4,7 +4,7 @@ set -e
 # --- configuration options defaults ---
 ANSIBLE_OPTIONS=${ANSIBLE_OPTIONS:=} # additional options
 
-ANSIBLE_PROJECT_FOLDER=${ANSIBLE_PROJECT_FOLDER:=`pwd`}
+ANSIBLE_PROJECT_FOLDER=${ANSIBLE_PROJECT_FOLDER:=$(pwd)}
 ANSIBLE_ROLEFILE=${ANSIBLE_ROLEFILE:=$ANSIBLE_PROJECT_FOLDER/Rolefile}
 ANSIBLE_ROLES_PATH=${ANSIBLE_ROLES_PATH:=$ANSIBLE_PROJECT_FOLDER/.roles}
 ANSIBLE_TMP_HOSTS=${ANSIBLE_TMP_HOSTS:=/tmp/ansible_hosts}
@@ -27,12 +27,6 @@ fi
 if [ ! -s $ANSIBLE_RUN_PLAYBOOK ]; then
   echo -e "${RED}Cannot find Ansible playbook $ANSIBLE_RUN_PLAYBOOK${NORMAL}"
   exit 10
-fi
-
-# --- vagrant invocation ---
-if [ ! "$VAGRANT_INVOKED" == true ] && [ "$ANSIBLE_RUN_VAGRANT" == true ]; then
-  source $VAGRANT_ANSIBLE_REMOTE/vagrant/ssh-ansible.sh
-  exit 0
 fi
 
 # --- copy the hosts to tmp file ---

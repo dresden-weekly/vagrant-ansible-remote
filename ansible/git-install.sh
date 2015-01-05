@@ -1,10 +1,12 @@
 #!/bin/bash
 set -e
 
+# --- configuration defaults ---
 ANSIBLE_VERSION=${ANSIBLE_VERSION:=1.8.2}
 ANSIBLE_OPTIONS=${ANSIBLE_OPTIONS:=}
 
 ANSIBLE_DIR=${ANSIBLE_DIR:=$ANSIBLE_PROJECT_FOLDER/.ansible}
+SOURCE_ANSIBLE=true
 
 # --- constants ---
 RED='\033[0;31m'

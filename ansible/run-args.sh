@@ -5,7 +5,7 @@ set -e
 # configuration options
 # =====================
 #
-# ANSIBLE_PROJECT_FOLDER
+# ANSIBLE_PROJECT_FOLDER (default: "$(pwd)")
 #   absolute base folder for the default ansible folders
 # ANSIBLE_HOSTS_DIR (default: "$ANSIBLE_PROJECT_FOLDER/hosts")
 #   absolute folder for normal hosts files
@@ -43,7 +43,7 @@ set -e
 #   additional provision arguments
 
 # --- defaults for configuration options ---
-ANSIBLE_PROJECT_FOLDER=${ANSIBLE_PROJECT_FOLDER:=`pwd`}
+ANSIBLE_PROJECT_FOLDER=${ANSIBLE_PROJECT_FOLDER:=$(pwd)}
 ANSIBLE_HOSTS_DIR=${ANSIBLE_RUN_HOSTS:=$ANSIBLE_PROJECT_FOLDER/hosts}
 ANSIBLE_VAGRANT_HOSTS_DIR=${ANSIBLE_VAGRANT_HOSTS_DIR:=$ANSIBLE_PROJECT_FOLDER/vagrant_hosts}
 VAGRANT_INVOKED=${VAGRANT_INVOKED:=false}
