@@ -1,15 +1,53 @@
 #!/bin/bash
+# This script installs Ansible Galaxy Roles and runs an Ansible Playbook
 set -e
 
-# --- configuration options defaults ---
-ANSIBLE_OPTIONS=${ANSIBLE_OPTIONS:=} # additional options
+# configuration options
+# =====================
+#
+# ANSIBLE_PROJECT_FOLDER (default: "$(pwd)")
+#   absolute base folder for the default ansible folders
+# ANSIBLE_ROLEFILE (default: "$ANSIBLE_PROJECT_FOLDER/Rolefile")
+#   absolute file path for the Ansible Galaxy Rolefile
+#   Ansible Galaxy will only be used if the file is present
+# ANSIBLE_ROLES_PATH (default: "$ANSIBLE_PROJECT_FOLDER/.roles")
+#   absolute folder path where Ansible Galaxy will install the roles of the Rolefile
+# ANSIBLE_TMP_HOSTS (default: "/tmp/ansible_hosts")
+#   absolute path for a temporary hosts file (used if original hosts file is executable)
+# SOURCE_ANSIBLE (default: false)
+#   flag whether custom Ansible installation should be sourced
+# ANSIBLE_DIR (default: "$ANSIBLE_PROJECT_FOLDER/.ansible")
+#   absolute folder path for the custom Ansible installation
+#
+# parameters
+# ==========
+#
+# ANSIBLE_OPTIONS
+#   additional options for ansible
+# ANSIBLE_RUN_HOSTS (default: "$ANSIBLE_PROJECT_FOLDER/hosts/default")
+#   absolute path to the hosts file
+# ANSIBLE_RUN_PLAYBOOK (default: "$ANSIBLE_PROJECT_FOLDER/provision.yml")
+#   absolute path to the playbook
+# ANSIBLE_RUN_PROVISION_ARGS
+#   additional provision arguments
+#
+# outputs/changes
+# ===============
+#
+# ANSIBLE_TMP_HOSTS may be changed
+# ANSIBLE_ROLES_PATH are exported
+# PROVISION_ARGS are exported
 
+# --- configuration options defaults ---
 ANSIBLE_PROJECT_FOLDER=${ANSIBLE_PROJECT_FOLDER:=$(pwd)}
 ANSIBLE_ROLEFILE=${ANSIBLE_ROLEFILE:=$ANSIBLE_PROJECT_FOLDER/Rolefile}
 ANSIBLE_ROLES_PATH=${ANSIBLE_ROLES_PATH:=$ANSIBLE_PROJECT_FOLDER/.roles}
 ANSIBLE_TMP_HOSTS=${ANSIBLE_TMP_HOSTS:=/tmp/ansible_hosts}
+SOURCE_ANSIBLE=${SOURCE_ANSIBLE:=false}
+ANSIBLE_DIR=${ANSIBLE_DIR:=$ANSIBLE_PROJECT_FOLDER/.ansible}
 
-ANSIBLE_RUN_VAGRANT=${ANSIBLE_RUN_VAGRANT:=false}
+# --- parameter defaults ---
+ANSIBLE_OPTIONS=${ANSIBLE_OPTIONS:=}
 ANSIBLE_RUN_HOSTS=${ANSIBLE_RUN_HOSTS:=$ANSIBLE_PROJECT_FOLDER/hosts/default}
 ANSIBLE_RUN_PLAYBOOK=${ANSIBLE_RUN_PLAYBOOK:=$ANSIBLE_PROJECT_FOLDER/provision.yml}
 ANSIBLE_RUN_PROVISION_ARGS=${ANSIBLE_RUN_PROVISION_ARGS:=}
@@ -40,8 +78,7 @@ else
 fi
 
 # --- use non system Ansible ---
-if [ "$SOURCE_ANSIBLE" = "true" ]; then
-  ANSIBLE_DIR=${ANSIBLE_DIR:=$HOME/ansible} # folder where ansible is installed
+if [ "$SOURCE_ANSIBLE" == true ]; then
   echo -e "${GREEN}Using Ansible from ${ANSIBLE_DIR} v$(cat $ANSIBLE_DIR/VERSION)${NORMAL}"
   cd $ANSIBLE_DIR # switch folder otherwise vagrant folder might not work
   source ${ANSIBLE_DIR}/hacking/env-setup
