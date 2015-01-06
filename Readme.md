@@ -5,7 +5,7 @@ A collection of common scripts used to run Ansible everywhere
 ## Mission statement
 
 * Should work for Windows, Mac and Linux systems.
-** Windows cannot run Ansible nativly.
+  * Windows cannot run Ansible nativly.
 * Tie the Ansible version/installation method to the project
 * Make Testing with Vagrant easy
 
@@ -18,61 +18,58 @@ Your project simply contains a "remote"-script. This script is very will install
 ## Prerequisites
 
 1. Vagrant
-2. Vagrant HostManager-Plugin
+1. Vagrant HostManager-Plugin
     ```bash
-        vagrant plugin install vagrant-hostmanager
+    vagrant plugin install vagrant-hostmanager
     ```
 
 ## Project Creation
 
 1. Copy the contents of template/ into a new folder
     ```bash
-        # bash
-        cp -R $vagrant-ansible-remote/template .
+    cp -R $vagrant-ansible-remote/template .
     ```
 
-2. Add this repository as git-submodule
+1. Add this repository as git-submodule
     ```bash
-        # bash
-        git submodule add https://github.com/dresden-weekly/vagrant-ansible-remote
+    git submodule add https://github.com/dresden-weekly/vagrant-ansible-remote
     ```
 
-3. Test your project setup with vagrant
+1. Test your project setup with vagrant
     ```bash
-        # bash
-        ./remote.sh
+    # bash
+    ./remote.sh
     ```
     ```cmd
-        # cmd
-        remote
+    :: cmd
+    remote
     ```
 
-4. Have fun!
+1. Have fun!
 
 ## Using Remote script
 
-```cmd
-    remote [-h|--help] [-v|--vagrant] [hosts] [playbook] [extra args]
-```
+argument schema:
+
+@remote [-h|--help] [-v|--vagrant] [hosts] [playbook] [extra args]@
 
 Simply calling
 ```cmd
-    remote
+remote
 ```
 equals:
 ```cmd
-    remote default provision
+remote default provision
 ```
 
 More examples:
 ```cmd
-    :: provision staging server
-    remote staging provision
-    
-    :: deploying release to staging server
-    remote staging deploy
+:: provision staging server
+remote staging provision
 
-    :: import dump from an archive
-    remote staging import_dump dumps/archive.tar.gz
+:: deploying release to staging server
+remote staging deploy
+
+:: import dump from an archive
+remote staging import_dump dumps/archive.tar.gz
 ```
-
