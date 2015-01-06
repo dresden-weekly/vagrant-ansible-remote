@@ -19,9 +19,11 @@ Your project simply contains a "remote"-script. This script is very will install
 
 1. Vagrant
 1. Vagrant HostManager-Plugin
-    ```bash
+
+    ```
     vagrant plugin install vagrant-hostmanager
     ```
+
 
 ## Project Creation
 
@@ -50,8 +52,9 @@ Your project simply contains a "remote"-script. This script is very will install
 ## Using Remote script
 
 argument schema:
-
-@remote [-h|--help] [-v|--vagrant] [hosts] [playbook] [extra args]@
+```
+remote [-h|--help] [-v|--vagrant] [hosts] [playbook] [extra args]
+```
 
 Simply calling
 ```cmd
