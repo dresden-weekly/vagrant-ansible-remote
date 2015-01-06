@@ -1,30 +1,78 @@
-Vagrant Ansible Remote
-======================
+# Vagrant Ansible Remote
 
 A collection of common scripts used to run Ansible everywhere
 
-Mission statement
------------------
+## Mission statement
 
-Should work for Windows, Mac and Linux systems.
-Install and use a specific version of Ansible.
+* Should work for Windows, Mac and Linux systems.
+** Windows cannot run Ansible nativly.
+* Tie the Ansible version/installation method to the project
+* Make Testing with Vagrant easy
 
-Simple use cases
-----------------
+## Solution
 
-  remote
+This project contains a set of generic and very configurable scripts that help with all these steps.
+
+Your project simply contains a "remote"-script. This script is very will install the right version of Ansible where you want it. It will also launch Vagrant virtual machines if necessary.
+
+## Prerequisites
+
+1. Vagrant
+2. Vagrant HostManager-Plugin
+    ```bash
+        vagrant plugin install vagrant-hostmanager
+    ```
+
+## Project Creation
+
+1. Copy the contents of template/ into a new folder
+    ```bash
+        # bash
+        cp -R $vagrant-ansible-remote/template .
+    ```
+
+2. Add this repository as git-submodule
+    ```bash
+        # bash
+        git submodule add https://github.com/dresden-weekly/vagrant-ansible-remote
+    ```
+
+3. Test your project setup with vagrant
+    ```bash
+        # bash
+        ./remote.sh
+    ```
+    ```cmd
+        # cmd
+        remote
+    ```
+
+4. Have fun!
+
+## Using Remote script
+
+```cmd
+    remote [-h|--help] [-v|--vagrant] [hosts] [playbook] [extra args]
+```
+
+Simply calling
+```cmd
+    remote
+```
 equals:
-  remote vagrant provision
+```cmd
+    remote default provision
+```
 
-provision other server
-  remote staging provision
-  remote staging deploy
+More examples:
+```cmd
+    :: provision staging server
+    remote staging provision
+    
+    :: deploying release to staging server
+    remote staging deploy
 
-execute other tasks
-  remote staging fixture_export
-  remote staging fixture_import system-20150101.tgz
+    :: import dump from an archive
+    remote staging import_dump dumps/archive.tar.gz
+```
 
-Challenges
-----------
-
-Windows cannot run Ansible nativly.
