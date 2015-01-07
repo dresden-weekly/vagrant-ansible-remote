@@ -66,11 +66,11 @@ if [ ! -d $ANSIBLE_DIR ]; then
   apt_get_update
 
   echo -e "${GREEN}Installing Ansible dependencies and Git${NORMAL}"
-  ${ROOT_PREFIX}apt-get install -y git python-yaml python-paramiko python-jinja2 sshpass
+  with_root apt-get install -y git python-yaml python-paramiko python-jinja2 sshpass
 
   echo -e "${GREEN}Cloning Ansible${NORMAL}"
   mkdir -p $ANSIBLE_DIR 2>/dev/null || GIT_PREFIX="with_root "
-  ${GIT_PREFIX}git clone --recurse-submodules --branch $ANSIBLE_GIT_BRANCH --depth 1 $ANSIBLE_GIT_REPO $ANSIBLE_DIR
+  with_root git clone --recurse-submodules --branch $ANSIBLE_GIT_BRANCH --depth 1 $ANSIBLE_GIT_REPO $ANSIBLE_DIR
 fi
 
 SOURCE_ANSIBLE=true
