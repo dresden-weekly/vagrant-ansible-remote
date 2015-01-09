@@ -36,13 +36,14 @@ NORMAL='\033[0m'
 
 # --- functions ---
 function with_root {
+  local SHELL_INVOCATION=$@
   if [ "$USER" = "root" ]; then
-    $@
+    $SHELL_INVOCATION
   elif [ -z "$PS1" ]; then
     # non interactive shell
-    sudo -n $@
+    sudo -n $SHELL_INVOCATION
   else
-    sudo $@
+    sudo $SHELL_INVOCATION
   fi
 }
 
@@ -50,6 +51,18 @@ function apt_get_update {
   if [ "$(date +%F-%H)" != "date -r /var/lib/apt/periodic/update-success-stamp +%F-%H" ]; then
     echo -e "${GREEN}Updating apt cache${NORMAL}"
     with_root apt-get update -qq
+  fi
+}
+
+function apt_get_install {
+  local MESSAGE=$1
+  shift
+  local PACKAGE_NAMES=$@
+  echo "apt-get -qq -s -o=APT::Get::Show-User-Simulation-Note=no install $PACKAGE_NAMES"
+  if [ ! -z "$(apt-get -qq -s -o=APT::Get::Show-User-Simulation-Note=no install $PACKAGE_NAMES)" ]; then
+    apt_get_update
+    echo -e "$MESSAGE"
+    with_root apt-get install -y $PACKAGE_NAMES
   fi
 }
 
@@ -61,13 +74,12 @@ if [ -f ${ANSIBLE_DIR}/VERSION ]; then
   fi
 fi
 
+# --- dependencies ---
+apt_get_install "${GREEN}Installing Ansible dependencies and Git${NORMAL}" \
+                git python-yaml python-paramiko python-jinja2 sshpass
+
 # --- install ---
 if [ ! -d $ANSIBLE_DIR ]; then
-  apt_get_update
-
-  echo -e "${GREEN}Installing Ansible dependencies and Git${NORMAL}"
-  with_root apt-get install -y git python-yaml python-paramiko python-jinja2 sshpass
-
   echo -e "${GREEN}Cloning Ansible${NORMAL}"
   mkdir -p $ANSIBLE_DIR 2>/dev/null || GIT_PREFIX="with_root "
   with_root git clone --recurse-submodules --branch $ANSIBLE_GIT_BRANCH --depth 1 $ANSIBLE_GIT_REPO $ANSIBLE_DIR

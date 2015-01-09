@@ -16,13 +16,14 @@ NORMAL='\033[0m'
 
 # --- functions ---
 function with_root {
+  local SHELL_INVOCATION=$@
   if [ "$USER" = "root" ]; then
-    $@
+    $SHELL_INVOCATION
   elif [ -z "$PS1" ]; then
     # non interactive shell
-    sudo -n $@
+    sudo -n $SHELL_INVOCATION
   else
-    sudo $@
+    sudo $SHELL_INVOCATION
   fi
 }
 
@@ -33,14 +34,21 @@ function apt_get_update {
   fi
 }
 
+function apt_get_install {
+  local MESSAGE=$1
+  shift
+  local PACKAGE_NAMES=$@
+  if [ ! -z "$(apt-get -qq -s -o=APT::Get::Show-User-Simulation-Note=no install $PACKAGE_NAMES)" ]; then
+    apt_get_update
+    echo -e "$MESSAGE"
+    with_root apt-get install -y $PACKAGE_NAMES
+  fi
+}
+
 # -- make sure ppa is present ---
 if [ ! -f "/etc/apt/sources.list.d/${ANSIBLE_PPA//\//-}-$(lsb_release -sc).list" ]; then
   # -- make sure apt-add-repository is present --
-  if [ -z "$(which apt-add-repository)" ]; then
-    echo -e "${GREEN}Installing software-properties${NORMAL}"
-    apt_get_update
-    with_root apt-get install -y software-properties-common
-  fi
+  apt_get_install "${GREEN}Installing software-properties${NORMAL}" software-properties-common
   echo -e "${GREEN}Adding Ansible ppa${NORMAL}"
   with_root apt-add-repository -y ppa:$ANSIBLE_PPA >/dev/null 2>&1
   with_root apt-get update -qq # forced update
@@ -49,7 +57,4 @@ else
 fi
 
 # -- install changes --
-if [ ! -z "$(apt-get -qq -s -o=APT::Get::Show-User-Simulation-Note=no install ansible)" ]; then
-  echo -e "${GREEN}Installing Ansible${NORMAL}"
-  with_root apt-get install -y ansible
-fi
+apt_get_install "${GREEN}Installing Ansible${NORMAL}" ansible
