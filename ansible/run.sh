@@ -9,6 +9,7 @@ set -e
 #   absolute base folder for the default ansible folders
 # ANSIBLE_ROLEFILE (default: "$ANSIBLE_PROJECT_FOLDER/Rolefile")
 #   absolute file path for the Ansible Galaxy Rolefile
+#   if a ${ANSIBLE_ROLEFILE}.yml (new syntax) exists it is preferred!
 #   Ansible Galaxy will only be used if the file is present
 # ANSIBLE_ROLES_PATH (default: "$ANSIBLE_PROJECT_FOLDER/.roles")
 #   absolute folder path where Ansible Galaxy will install the roles of the Rolefile
@@ -85,13 +86,16 @@ if [ "$SOURCE_ANSIBLE" == true ]; then
 fi
 
 # --- use ansible-galaxy Rolefile ---
-if [ -f $ANSIBLE_ROLEFILE ]; then
+if [ -r "${ANSIBLE_ROLEFILE}.yml" ]; then
+  ANSIBLE_ROLEFILE="${ANSIBLE_ROLEFILE}.yml"
+fi
+if [ -r "$ANSIBLE_ROLEFILE" ]; then
   echo -e "${GREEN}Using Rolefile${NORMAL}"
+  export ANSIBLE_ROLES_PATH=$ANSIBLE_ROLES_PATH
   if [ ! -d $ANSIBLE_ROLES_PATH ]; then
     mkdir -p $ANSIBLE_ROLES_PATH
+    ansible-galaxy install --role-file=$ANSIBLE_ROLEFILE
   fi
-  export ANSIBLE_ROLES_PATH=$ANSIBLE_ROLES_PATH
-  ansible-galaxy install --role-file=$ANSIBLE_ROLEFILE --force
 fi
 
 # --- run ---
