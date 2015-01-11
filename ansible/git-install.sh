@@ -58,7 +58,6 @@ function apt_get_install {
   local MESSAGE=$1
   shift
   local PACKAGE_NAMES=$@
-  echo "apt-get -qq -s -o=APT::Get::Show-User-Simulation-Note=no install $PACKAGE_NAMES"
   if [ ! -z "$(apt-get -qq -s -o=APT::Get::Show-User-Simulation-Note=no install $PACKAGE_NAMES)" ]; then
     apt_get_update
     echo -e "$MESSAGE"
