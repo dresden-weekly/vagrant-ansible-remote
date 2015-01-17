@@ -108,7 +108,7 @@ options:$option_lines"
 function remove_remember_hosts_file {
   if [ -s "$ANSIBLE_REMEMBER_HOSTS_FILE" ]; then
     rm $ANSIBLE_REMEMBER_HOSTS_FILE
-    echo -e "${GREEN}Forgot stored hosts:${NORMAL}"
+    echo -e "${GREEN}Forgot stored hosts.${NORMAL}"
   fi
   unset ANSIBLE_REMEMBERED_HOSTS_NAME
   ANSIBLE_RUN_HOSTS_NAME=$ANSIBLE_HOSTS_NAME
