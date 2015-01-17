@@ -11,6 +11,8 @@ set -e
 #   absolute folder for normal hosts files
 # ANSIBLE_VAGRANT_HOSTS_DIR (default: "$ANSIBLE_PROJECT_FOLDER/vagrant_hosts")
 #   absolute folder for vagrant hosts files
+# ANSIBLE_PLAYBOOK_DIR (default: "$ANSIBLE_PROJECT_FOLDER/plays")
+#   absolute folder for playbook files
 # VAGRANT_INVOKED (default: false)
 #   set this to true if this was called through Vagrant
 # ANSIBLE_RUN_ARGS
@@ -20,7 +22,7 @@ set -e
 # ANSIBLE_HOSTS_NAME (default: "default")
 #   default relative hosts file, overriden by parameters
 #   resolved with $ANSIBLE_HOSTS_DIR or $ANSIBLE_VAGRANT_HOSTS_DIR
-# ANSIBLE_PLAYBOOK_NAME (default: "provision.yml")
+# ANSIBLE_PLAYBOOK_NAME (default: "provision")
 #   default relative playbook file, overriden by parameters
 #   resolved with $ANSIBLE_PROJECT_FOLDER
 #
@@ -30,13 +32,13 @@ set -e
 # ANSIBLE_RUN_ARGS
 #   all arguments, useful to call ansible inside vagrant
 #
-# ANSIBLE_RUN_VAGRANT (default: false)
+# ANSIBLE_RUN_VAGRANT
 #   flag whether vagrant should be used to invoke Ansible
 #
-# ANSIBLE_RUN_HOSTS (default: default)
+# ANSIBLE_RUN_HOSTS (default: "$ANSIBLE_HOSTS_DIR/$ANSIBLE_HOSTS_NAME")
 #   absolute path to the hosts file
 #
-# ANSIBLE_RUN_PLAYBOOK (default: provision.yml)
+# ANSIBLE_RUN_PLAYBOOK (default: "$ANSIBLE_PLAYBOOK_DIR/$ANSIBLE_PLAYBOOK_NAME.yml")
 #   absolute path to the playbook
 #
 # ANSIBLE_RUN_PROVISION_ARGS
@@ -46,12 +48,13 @@ set -e
 ANSIBLE_PROJECT_FOLDER=${ANSIBLE_PROJECT_FOLDER:=$(pwd)}
 ANSIBLE_HOSTS_DIR=${ANSIBLE_RUN_HOSTS:=$ANSIBLE_PROJECT_FOLDER/hosts}
 ANSIBLE_VAGRANT_HOSTS_DIR=${ANSIBLE_VAGRANT_HOSTS_DIR:=$ANSIBLE_PROJECT_FOLDER/vagrant_hosts}
+ANSIBLE_PLAYBOOK_DIR=${ANSIBLE_PLAYBOOK_DIR:=$ANSIBLE_PROJECT_FOLDER/plays}
 VAGRANT_INVOKED=${VAGRANT_INVOKED:=false}
 
 ANSIBLE_RUN_ARGS=${ANSIBLE_RUN_ARGS:=}
 ANSIBLE_RUN_VAGRANT=${ANSIBLE_RUN_VAGRANT:=false}
 ANSIBLE_HOSTS_NAME=${ANSIBLE_HOSTS_NAME:=default}
-ANSIBLE_PLAYBOOK_NAME=${ANSIBLE_PLAYBOOK_NAME:=provision.yml}
+ANSIBLE_PLAYBOOK_NAME=${ANSIBLE_PLAYBOOK_NAME:=provision}
 ANSIBLE_RUN_PROVISION_ARGS=${ANSIBLE_RUN_PROVISION_ARGS:=}
 
 # --- constants ---
@@ -120,8 +123,7 @@ if [ ! -z "$1" ] ; then
     ANSIBLE_RUN_HOSTS=$ANSIBLE_HOSTS_DIR/$1
     echo -e "${GREEN}Target:${NORMAL} $1"
     shift
-  fi
-  if [ -s "$ANSIBLE_VAGRANT_HOSTS_DIR/$1" ]; then
+  elif [ -s "$ANSIBLE_VAGRANT_HOSTS_DIR/$1" ]; then
     ANSIBLE_RUN_VAGRANT=true
     ANSIBLE_RUN_HOSTS=$ANSIBLE_VAGRANT_HOSTS_DIR/$1
     echo -e "${GREEN}Target though Vagrant:${NORMAL} $1"
@@ -130,14 +132,17 @@ if [ ! -z "$1" ] ; then
 fi
 
 # playbook
-ANSIBLE_RUN_PLAYBOOK=$ANSIBLE_PROJECT_FOLDER/$ANSIBLE_PLAYBOOK_NAME
-if [ ! -z "$1" ] ; then
-  if [ -s "$ANSIBLE_PROJECT_FOLDER/$1.yml" ]; then
-    ANSIBLE_RUN_PLAYBOOK=$ANSIBLE_PROJECT_FOLDER/$1.yml
-    echo -e "${GREEN}Action:${NORMAL} $1"
-    shift
-  fi
+ANSIBLE_RUN_PLAYBOOK_FOLDER=
+while [ ! -z "$1" ] && [ -d "$ANSIBLE_PLAYBOOK_DIR$ANSIBLE_RUN_PLAYBOOK_FOLDER/$1" ]; do
+  ANSIBLE_RUN_PLAYBOOK_FOLDER="$ANSIBLE_RUN_PLAYBOOK_FOLDER/$1"
+  shift
+done
+if [ ! -z "$1" ] && [ -s "$ANSIBLE_PLAYBOOK_DIR$ANSIBLE_RUN_PLAYBOOK_FOLDER/$1.yml" ]; then
+  ANSIBLE_PLAYBOOK_NAME=$1
+  echo -e "${GREEN}Action:${NORMAL} $ANSIBLE_RUN_PLAYBOOK_FOLDER/$ANSIBLE_PLAYBOOK_NAME"
+  shift
 fi
+ANSIBLE_RUN_PLAYBOOK="$ANSIBLE_PLAYBOOK_DIR$ANSIBLE_RUN_PLAYBOOK_FOLDER/$ANSIBLE_PLAYBOOK_NAME.yml"
 
 # provision arguments
 if [ ! -z "$1" ] ; then
