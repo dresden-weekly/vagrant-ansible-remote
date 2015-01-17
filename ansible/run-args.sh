@@ -49,6 +49,7 @@ ANSIBLE_PROJECT_FOLDER=${ANSIBLE_PROJECT_FOLDER:=$(pwd)}
 ANSIBLE_HOSTS_DIR=${ANSIBLE_RUN_HOSTS:=$ANSIBLE_PROJECT_FOLDER/hosts}
 ANSIBLE_VAGRANT_HOSTS_DIR=${ANSIBLE_VAGRANT_HOSTS_DIR:=$ANSIBLE_PROJECT_FOLDER/vagrant_hosts}
 ANSIBLE_PLAYBOOK_DIR=${ANSIBLE_PLAYBOOK_DIR:=$ANSIBLE_PROJECT_FOLDER/plays}
+ANSIBLE_REMEMBER_HOSTS_FILE=${ANSIBLE_REMEMBER_HOSTS_FILE:=$ANSIBLE_PROJECT_FOLDER/.remember}
 VAGRANT_INVOKED=${VAGRANT_INVOKED:=false}
 
 ANSIBLE_RUN_ARGS=${ANSIBLE_RUN_ARGS:=}
@@ -61,32 +62,35 @@ ANSIBLE_RUN_PROVISION_ARGS=${ANSIBLE_RUN_PROVISION_ARGS:=}
 GREEN='\033[0;32m'
 NORMAL='\033[0m'
 
-# help
-if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
+function show_help {
   cmd_line=remote
   where_lines=
   # help
   cmd_line="$cmd_line [-h|--help]"
   where_lines="$where_lines
     -h|--help     show this help message"
+  # vagrant
   if [ ! "$VAGRANT_INVOKED" == true ]; then
-    # vagrant
     cmd_line="$cmd_line [-v|--vagrant]"
     where_lines="$where_lines
     -v|--vagrant  use Vagrant for Ansible invocation"
   fi
-  # TODO: system
-  # cmd_line="$cmd_line [-s|--system]"
-  # where_lines="$where_lines
-  #   -s|--system   use the system installation of Ansible"
+  # remember
+  cmd_line="$cmd_line [--remember]"
+  where_lines="$where_lines
+  --remember      remember the hosts as the default for future runs"
+  # forget
+  cmd_line="$cmd_line [--forget]"
+  where_lines="$where_lines
+  --forget        forget the remembered hosts"
   # hosts
   cmd_line="$cmd_line [hosts]"
   where_lines="$where_lines
-    hosts         hosts/groups-file where playbook is executed (default: vagrant)"
+    hosts         hosts inventory where playbook is executed (default: ${ANSIBLE_RUN_HOSTS_NAME})"
   # playbook
-  cmd_line="$cmd_line [playbook]"
+  cmd_line="$cmd_line [playbook...]"
   where_lines="$where_lines
-    playbook      basename of the playbook that should be executed (default: provision)"
+    playbook      folder and basename of the playbook that should be executed (default: ${ANSIBLE_PLAYBOOK_NAME})"
   # extra args
   cmd_line="$cmd_line [extra args...]"
   where_lines="$where_lines
@@ -96,39 +100,79 @@ if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
 
 where:$where_lines"
   exit 99
+}
+
+function remove_remember_hosts_file {
+  if [ -s "$ANSIBLE_REMEMBER_HOSTS_FILE" ]; then
+    rm $ANSIBLE_REMEMBER_HOSTS_FILE
+    echo -e "${GREEN}Forgot stored hosts:${NORMAL}"
+  fi
+  unset ANSIBLE_REMEMBERED_HOSTS_NAME
+  ANSIBLE_RUN_HOSTS_NAME=$ANSIBLE_HOST_NAME
+}
+
+#restore remembered host
+if [ -s "$ANSIBLE_REMEMBER_HOSTS_FILE" ]; then
+  ANSIBLE_REMEMBERED_HOSTS_NAME=$(< $ANSIBLE_REMEMBER_HOSTS_FILE)
+  ANSIBLE_RUN_HOSTS_NAME=$ANSIBLE_REMEMBERED_HOSTS_NAME
+else
+  ANSIBLE_RUN_HOSTS_NAME=$ANSIBLE_HOST_NAME
 fi
 
-ANSIBLE_RUN_ARGS=$@
-
-# vagrant
+#options
 if [ "$VAGRANT_INVOKED" == true ]; then
   ANSIBLE_RUN_VAGRANT=true
-else
-  if [ "$1" == "--vagrant" ] || [ "$1" == "-v" ]; then
+fi
+ANSIBLE_RUN_REMEMBER=false
+ANSIBLE_RUN_ARGS=$@
+while [ ! -z "$1" ] ; do
+  case $1 in
+  -h|--help)
+    show_help
+    ;;
+  -v|--vagrant)
     ANSIBLE_RUN_VAGRANT=true
-    shift
-  fi
-fi
-
-# absolute hosts file default
-if [ "$ANSIBLE_RUN_VAGRANT" == true ]; then
-  ANSIBLE_RUN_HOSTS=$ANSIBLE_VAGRANT_HOSTS_DIR/$ANSIBLE_HOSTS_NAME
-else
-  ANSIBLE_RUN_HOSTS=$ANSIBLE_HOSTS_DIR/$ANSIBLE_HOSTS_NAME
-fi
+    ;;
+  --remember)
+    ANSIBLE_RUN_REMEMBER=true
+    ;;
+  --forget)
+    remove_remember_hosts_file
+    ;;
+  *)
+    break
+  esac
+  shift
+done
 
 # hosts
 if [ ! -z "$1" ] ; then
   if [ ! "$ANSIBLE_RUN_VAGRANT" == true ] && [ -s "$ANSIBLE_HOSTS_DIR/$1" ]; then
-    ANSIBLE_RUN_HOSTS=$ANSIBLE_HOSTS_DIR/$1
-    echo -e "${GREEN}Target:${NORMAL} $1"
+    ANSIBLE_RUN_HOSTS_NAME=$1
+    echo -e "${GREEN}Hosts:${NORMAL} $ANSIBLE_RUN_HOSTS_NAME"
     shift
   elif [ -s "$ANSIBLE_VAGRANT_HOSTS_DIR/$1" ]; then
     ANSIBLE_RUN_VAGRANT=true
-    ANSIBLE_RUN_HOSTS=$ANSIBLE_VAGRANT_HOSTS_DIR/$1
-    echo -e "${GREEN}Target though Vagrant:${NORMAL} $1"
+    ANSIBLE_RUN_HOSTS_NAME=$1
+    echo -e "${GREEN}Hosts though Vagrant:${NORMAL} $ANSIBLE_RUN_HOSTS_NAME"
     shift
   fi
+fi
+if [ "$ANSIBLE_REMEMBERED_HOSTS_NAME" != "$ANSIBLE_HOSTS_NAME" ] && [ "$ANSIBLE_RUN_HOSTS_NAME" == "$ANSIBLE_REMEMBERED_HOSTS_NAME" ]; then
+  if [ "$ANSIBLE_RUN_VAGRANT" == true ]; then
+    echo -e "${GREEN}Remembered Hosts though Vagrant:${NORMAL} $ANSIBLE_RUN_HOSTS_NAME"
+  else
+    echo -e "${GREEN}Remembered Hosts:${NORMAL} $ANSIBLE_RUN_HOSTS_NAME"
+  fi
+fi
+if [ "$ANSIBLE_RUN_VAGRANT" == true ]; then
+  ANSIBLE_RUN_HOSTS=$ANSIBLE_VAGRANT_HOSTS_DIR/$ANSIBLE_RUN_HOSTS_NAME
+else
+  ANSIBLE_RUN_HOSTS=$ANSIBLE_HOSTS_DIR/$ANSIBLE_RUN_HOSTS_NAME
+fi
+if [ "$ANSIBLE_RUN_REMEMBER" == true ]; then
+  echo $ANSIBLE_RUN_HOSTS_NAME>$ANSIBLE_REMEMBER_HOSTS_FILE
+  echo -e "${GREEN}Will remember hosts:${NORMAL} $ANSIBLE_RUN_HOSTS_NAME"
 fi
 
 # playbook
