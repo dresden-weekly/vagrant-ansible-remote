@@ -16,17 +16,26 @@ if not defined VAGRANT_ANSIBLE_REMOTE (
   set "VAGRANT_ANSIBLE_REMOTE=vagrant_ansible_remote"
 )
 
+:: --- constants ---
+if defined ANSICON (
+  set "RED=[1;31;40m"
+  set "NORMAL=[0m"
+) else (
+  set RED=
+  set NORMAL=
+)
+
 :: --- check environment ---
 if not exist "%PROJECT_FOLDER%" (
-  echo PROJECT_FOLDER is not valid
+  echo %RED%PROJECT_FOLDER%NORMAL% is not valid
   exit 20
 )
 if "%VAGRANT_ANSIBLE_REMOTE%." == "" (
-  echo VAGRANT_ANSIBLE_REMOTE is not valid
+  echo %RED%VAGRANT_ANSIBLE_REMOTE%NORMAL% is not valid
   exit 21
 )
 if not exist "%PROJECT_FOLDER%/%VAGRANT_ANSIBLE_REMOTE%" (
-  echo VAGRANT_ANSIBLE_REMOTE is not valid
+  echo %RED%VAGRANT_ANSIBLE_REMOTE%NORMAL% is not valid
   exit 21
 )
 
