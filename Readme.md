@@ -53,7 +53,7 @@ Your project simply contains a "remote"-script. This script is very will install
 
 argument schema:
 ```
-remote [-h|--help] [-v|--vagrant] [hosts] [playbook] [extra args]
+remote [options]* [hosts]? [playbook]* [extra args]*
 ```
 
 Simply calling

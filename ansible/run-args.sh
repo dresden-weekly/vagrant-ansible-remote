@@ -63,42 +63,40 @@ GREEN='\033[0;32m'
 NORMAL='\033[0m'
 
 function show_help {
-  cmd_line=remote
-  where_lines=
+  cmd_line=remote [options]*
+  option_lines=
+  argument_lines=
   # help
-  cmd_line="$cmd_line [-h|--help]"
-  where_lines="$where_lines
+  option_lines="$option_lines
     -h|--help     show this help message"
   # vagrant
   if [ ! "$VAGRANT_INVOKED" == true ]; then
-    cmd_line="$cmd_line [-v|--vagrant]"
-    where_lines="$where_lines
+    option_lines="$option_lines
     -v|--vagrant  use Vagrant for Ansible invocation"
   fi
   # remember
-  cmd_line="$cmd_line [--remember]"
-  where_lines="$where_lines
-  --remember      remember the hosts as the default for future runs"
+  option_lines="$option_lines
+    --remember    remember the hosts as the default for future runs"
   # forget
-  cmd_line="$cmd_line [--forget]"
-  where_lines="$where_lines
-  --forget        forget the remembered hosts"
+  option_lines="$option_lines
+    --forget      forget the remembered hosts"
   # hosts
   cmd_line="$cmd_line [hosts]"
-  where_lines="$where_lines
+  argument_lines="$argument_lines
     hosts         hosts inventory where playbook is executed (default: ${ANSIBLE_RUN_HOSTS_NAME})"
   # playbook
-  cmd_line="$cmd_line [playbook...]"
-  where_lines="$where_lines
+  cmd_line="$cmd_line [playbook]*"
+  argument_lines="$argument_lines
     playbook      folder and basename of the playbook that should be executed (default: ${ANSIBLE_PLAYBOOK_NAME})"
   # extra args
-  cmd_line="$cmd_line [extra args...]"
-  where_lines="$where_lines
+  cmd_line="$cmd_line [extra args]*"
+  argument_lines="$argument_lines
     extra args    arguments passed as PROVISION_ARGS environment variable to the playbook"
 
   echo "$cmd_line
+options:$option_lines
 
-where:$where_lines"
+arguments:$argument_lines"
   exit 99
 }
 
