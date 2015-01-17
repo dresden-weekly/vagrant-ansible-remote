@@ -63,7 +63,7 @@ GREEN='\033[0;32m'
 NORMAL='\033[0m'
 
 function show_help {
-  cmd_line=remote [options]*
+  cmd_line="remote"
   option_lines=
   argument_lines=
   # help
@@ -80,6 +80,10 @@ function show_help {
   # forget
   option_lines="$option_lines
     --forget      forget the remembered hosts"
+  # options
+  cmd_line="$cmd_line [options]*"
+  argument_lines="$argument_lines
+    options       additional options in any order. See below!"
   # hosts
   cmd_line="$cmd_line [hosts]"
   argument_lines="$argument_lines
@@ -94,9 +98,10 @@ function show_help {
     extra args    arguments passed as PROVISION_ARGS environment variable to the playbook"
 
   echo "$cmd_line
-options:$option_lines
 
-arguments:$argument_lines"
+arguments:$argument_lines
+
+options:$option_lines"
   exit 99
 }
 
