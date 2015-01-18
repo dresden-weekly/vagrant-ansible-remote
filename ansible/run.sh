@@ -7,11 +7,13 @@ set -e
 #
 # ANSIBLE_PROJECT_FOLDER (default: "$(pwd)")
 #   absolute base folder for the default ansible folders
-# ANSIBLE_ROLEFILE (default: "$ANSIBLE_PROJECT_FOLDER/Rolefile")
+# ANSIBLE_PROJECT_ROLES (default: "$ANSIBLE_PROJECT_FOLDER/roles")
+#   absolute folder path for project specific roles
+# ANSIBLE_GALAXY_ROLEFILE (default: "$ANSIBLE_PROJECT_FOLDER/Rolefile")
 #   absolute file path for the Ansible Galaxy Rolefile
-#   if a ${ANSIBLE_ROLEFILE}.yml (new syntax) exists it is preferred!
+#   if a ${ANSIBLE_GALAXY_ROLEFILE}.yml (new syntax) exists it is preferred!
 #   Ansible Galaxy will only be used if the file is present
-# ANSIBLE_ROLES_PATH (default: "$ANSIBLE_PROJECT_FOLDER/.roles")
+# ANSIBLE_GALAXY_ROLES (default: "$ANSIBLE_PROJECT_FOLDER/.roles")
 #   absolute folder path where Ansible Galaxy will install the roles of the Rolefile
 # ANSIBLE_TMP_HOSTS (default: "/tmp/ansible_hosts")
 #   absolute path for a temporary hosts file (used if original hosts file is executable)
@@ -36,13 +38,14 @@ set -e
 # ===============
 #
 # ANSIBLE_TMP_HOSTS may be changed
-# ANSIBLE_ROLES_PATH are exported
-# PROVISION_ARGS are exported
+# ANSIBLE_ROLES_PATH is exported
+# PROVISION_ARGS is exported
 
 # --- configuration options defaults ---
 ANSIBLE_PROJECT_FOLDER=${ANSIBLE_PROJECT_FOLDER:=$(pwd)}
-ANSIBLE_ROLEFILE=${ANSIBLE_ROLEFILE:=$ANSIBLE_PROJECT_FOLDER/Rolefile}
-ANSIBLE_ROLES_PATH=${ANSIBLE_ROLES_PATH:=$ANSIBLE_PROJECT_FOLDER/.roles}
+ANSIBLE_PROJECT_ROLES=${ANSIBLE_PROJECT_ROLES:=$ANSIBLE_PROJECT_FOLDER/roles}
+ANSIBLE_GALAXY_ROLEFILE=${ANSIBLE_GALAXY_ROLEFILE:=$ANSIBLE_PROJECT_FOLDER/Rolefile}
+ANSIBLE_GALAXY_ROLES=${ANSIBLE_GALAXY_ROLES:=$ANSIBLE_PROJECT_FOLDER/.roles}
 ANSIBLE_TMP_HOSTS=${ANSIBLE_TMP_HOSTS:=/tmp/ansible_hosts}
 SOURCE_ANSIBLE=${SOURCE_ANSIBLE:=false}
 ANSIBLE_DIR=${ANSIBLE_DIR:=$ANSIBLE_PROJECT_FOLDER/.ansible}
@@ -86,20 +89,22 @@ if [ "$SOURCE_ANSIBLE" == true ]; then
 fi
 
 # --- use ansible-galaxy Rolefile ---
-if [ -r "${ANSIBLE_ROLEFILE}.yml" ]; then
-  ANSIBLE_ROLEFILE="${ANSIBLE_ROLEFILE}.yml"
+if [ -r "${ANSIBLE_GALAXY_ROLEFILE}.yml" ]; then
+  ANSIBLE_GALAXY_ROLEFILE="${ANSIBLE_GALAXY_ROLEFILE}.yml"
 fi
-if [ -r "$ANSIBLE_ROLEFILE" ]; then
+ANSIBLE_ROLES_PATH=$ANSIBLE_PROJECT_ROLES
+if [ -r "$ANSIBLE_GALAXY_ROLEFILE" ]; then
   echo -e "${GREEN}Using Rolefile${NORMAL}"
-  export ANSIBLE_ROLES_PATH=$ANSIBLE_ROLES_PATH
-  if [ ! -d $ANSIBLE_ROLES_PATH ]; then
-    mkdir -p $ANSIBLE_ROLES_PATH
-    ansible-galaxy install --role-file=$ANSIBLE_ROLEFILE
+  ANSIBLE_ROLES_PATH=$ANSIBLE_ROLES_PATH:$ANSIBLE_GALAXY_ROLES
+  if [ ! -d $ANSIBLE_GALAXY_ROLES ]; then
+    mkdir -p $ANSIBLE_GALAXY_ROLES
+    ansible-galaxy install --role-file=$ANSIBLE_GALAXY_ROLEFILE
   fi
 fi
 
 # --- run ---
 echo -e "${GREEN}Running Ansible${NORMAL}"
+export ANSIBLE_ROLES_PATH=$ANSIBLE_ROLES_PATH
 export PROVISION_ARGS=$ANSIBLE_RUN_PROVISION_ARGS
 ansible-playbook $ANSIBLE_OPTIONS $ANSIBLE_RUN_PLAYBOOK --inventory-file=$ANSIBLE_TMP_HOSTS
 
