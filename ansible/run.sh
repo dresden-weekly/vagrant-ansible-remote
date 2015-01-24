@@ -15,8 +15,6 @@ set -e
 #   Ansible Galaxy will only be used if the file is present
 # ANSIBLE_GALAXY_ROLES (default: "$ANSIBLE_PROJECT_FOLDER/.roles")
 #   absolute folder path where Ansible Galaxy will install the roles of the Rolefile
-# ANSIBLE_TMP_HOSTS (default: "/tmp/ansible_hosts")
-#   absolute path for a temporary hosts file (used if original hosts file is executable)
 # SOURCE_ANSIBLE (default: false)
 #   flag whether custom Ansible installation should be sourced
 # ANSIBLE_DIR (default: "$ANSIBLE_PROJECT_FOLDER/.ansible")
@@ -37,7 +35,6 @@ set -e
 # outputs/changes
 # ===============
 #
-# ANSIBLE_TMP_HOSTS may be changed
 # ANSIBLE_ROLES_PATH is exported
 # PROVISION_ARGS is exported
 
@@ -46,7 +43,6 @@ ANSIBLE_PROJECT_FOLDER=${ANSIBLE_PROJECT_FOLDER:=$(pwd)}
 ANSIBLE_PROJECT_ROLES=${ANSIBLE_PROJECT_ROLES:=$ANSIBLE_PROJECT_FOLDER/roles}
 ANSIBLE_GALAXY_ROLEFILE=${ANSIBLE_GALAXY_ROLEFILE:=$ANSIBLE_PROJECT_FOLDER/Rolefile}
 ANSIBLE_GALAXY_ROLES=${ANSIBLE_GALAXY_ROLES:=$ANSIBLE_PROJECT_FOLDER/.roles}
-ANSIBLE_TMP_HOSTS=${ANSIBLE_TMP_HOSTS:=/tmp/ansible_hosts}
 SOURCE_ANSIBLE=${SOURCE_ANSIBLE:=false}
 ANSIBLE_DIR=${ANSIBLE_DIR:=$ANSIBLE_PROJECT_FOLDER/.ansible}
 
@@ -71,14 +67,14 @@ if [ ! -s $ANSIBLE_RUN_PLAYBOOK ]; then
   exit 10
 fi
 
-# --- copy the hosts to tmp file ---
-# Windows shares default to executable
-# Ansible does not like this
+# --- check hosts executable flags ---
+# Windows/Vagrant shares default to executable
+# Ansible will try to execute hosts files if they are executable
+# Solution:
+#   fix config.vm.synced_folder ".", "/vagrant", :mount_options => ["dmode=777","fmode=666"]
 if [ -x "$ANSIBLE_RUN_HOSTS" ]; then
-  cp $ANSIBLE_RUN_HOSTS $ANSIBLE_TMP_HOSTS
-  chmod -x $ANSIBLE_TMP_HOSTS
-else
-  ANSIBLE_TMP_HOSTS=$ANSIBLE_RUN_HOSTS
+  echo -e "${RED}Warning:${NORMAL} $ANSIBLE_RUN_HOSTS is executable! Apply the following fix if this run fails."
+  echo -e "   fix config.vm.synced_folder \".\", \"/vagrant\", :mount_options => [\"dmode=777\",\"fmode=666\"]"
 fi
 
 # --- use non system Ansible ---
@@ -106,9 +102,5 @@ fi
 echo -e "${GREEN}Running Ansible${NORMAL}"
 export ANSIBLE_ROLES_PATH=$ANSIBLE_ROLES_PATH
 export PROVISION_ARGS=$ANSIBLE_RUN_PROVISION_ARGS
-ansible-playbook $ANSIBLE_OPTIONS $ANSIBLE_RUN_PLAYBOOK --inventory-file=$ANSIBLE_TMP_HOSTS
-
-# --- clean up ---
-if [ -x "$ANSIBLE_RUN_HOSTS" ]; then
-  rm $ANSIBLE_TMP_HOSTS
-fi
+echo "ansible-playbook $ANSIBLE_OPTIONS $ANSIBLE_RUN_PLAYBOOK --inventory-file=$ANSIBLE_RUN_HOSTS"
+ansible-playbook $ANSIBLE_OPTIONS $ANSIBLE_RUN_PLAYBOOK --inventory-file=$ANSIBLE_RUN_HOSTS

@@ -20,10 +20,9 @@ SETLOCAL ENABLEEXTENSIONS
 ::   Where is the project mounted in the Vagrant guest
 :: VAGRANT_ANSIBLE_REMOTE (default: "vagrant_ansible_remote")
 ::   Relative path of vagrant-ansible-remote to the project
-:: VAGRANT_ANSIBLE_INVOKE_PREFIX (default: "sudo")
+:: VAGRANT_ANSIBLE_INVOKE_PREFIX (default: "")
 ::   Prefix command for the invokation script
-::   "sudo" allows for Ansible installation
-:: VAGRANT_ANSIBLE_INVOKE_SCRIPT (default: "vagrant/invoke-ansible.sh")
+:: VAGRANT_ANSIBLE_INVOKE_SCRIPT (default: "remote.sh")
 ::   Path of the invokated script relative to vagrant-ansible-remote
 
 :: --- option defaults ---
@@ -39,9 +38,9 @@ if not defined VAGRANT_PROJECT_MOUNT (
 if not defined VAGRANT_ANSIBLE_REMOTE (
   set "VAGRANT_ANSIBLE_REMOTE=vagrant_ansible_remote"
 )
-::if not defined VAGRANT_ANSIBLE_INVOKE_PREFIX (
-::  set "VAGRANT_ANSIBLE_INVOKE_PREFIX=sudo"
-::)
+if not defined VAGRANT_ANSIBLE_INVOKE_PREFIX (
+  set "VAGRANT_ANSIBLE_INVOKE_PREFIX="
+)
 if not defined VAGRANT_ANSIBLE_INVOKE_SCRIPT (
   set "VAGRANT_ANSIBLE_INVOKE_SCRIPT=remote.sh"
 )

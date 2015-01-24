@@ -7,7 +7,7 @@ set -e
 #
 # ANSIBLE_PROJECT_FOLDER (default: "$(pwd)")
 #   absolute base folder for the default ansible folders
-# ANSIBLE_DIR (default: "$ANSIBLE_PROJECT_FOLDER/.ansible")
+# ANSIBLE_DIR (default: "/opt/ansible")
 #   absolute folder path for the custom Ansible installation
 # ANSIBLE_VERSION (default: "1.8.2" - the latest)
 #   Version of Ansible that is used
@@ -24,7 +24,7 @@ set -e
 
 # --- configuration defaults ---
 ANSIBLE_PROJECT_FOLDER=${ANSIBLE_PROJECT_FOLDER:=$(pwd)}
-ANSIBLE_DIR=${ANSIBLE_DIR:=$ANSIBLE_PROJECT_FOLDER/.ansible}
+ANSIBLE_DIR=${ANSIBLE_DIR:=/opt/ansible}
 ANSIBLE_VERSION=${ANSIBLE_VERSION:=1.8.2}
 ANSIBLE_GIT_REPO=${ANSIBLE_GIT_REPO:=git://github.com/ansible/ansible.git}
 ANSIBLE_GIT_BRANCH=${ANSIBLE_GIT_BRANCH:=release$ANSIBLE_VERSION}
@@ -69,7 +69,11 @@ function apt_get_install {
 if [ -f ${ANSIBLE_DIR}/VERSION ]; then
   if [ $(<${ANSIBLE_DIR}/VERSION) != $ANSIBLE_VERSION ]; then
     echo -e "${RED}Removing old Ansible version $(<${ANSIBLE_DIR}/VERSION)${NORMAL}"
-    rm -rf ${ANSIBLE_DIR}
+    if [ -w ${ANSIBLE_DIR} ]; then
+      rm -rf ${ANSIBLE_DIR}
+    else
+      with_root rm -rf ${ANSIBLE_DIR}
+    fi
   fi
 fi
 
@@ -81,7 +85,7 @@ apt_get_install "${GREEN}Installing Ansible dependencies and Git${NORMAL}" \
 if [ ! -d $ANSIBLE_DIR ]; then
   echo -e "${GREEN}Cloning Ansible${NORMAL}"
   mkdir -p $ANSIBLE_DIR 2>/dev/null || GIT_PREFIX="with_root "
-  with_root git clone --recurse-submodules --branch $ANSIBLE_GIT_BRANCH --depth 1 $ANSIBLE_GIT_REPO $ANSIBLE_DIR
+  $GIT_PREFIX git clone --recurse-submodules --branch $ANSIBLE_GIT_BRANCH --depth 1 $ANSIBLE_GIT_REPO $ANSIBLE_DIR
 fi
 
 SOURCE_ANSIBLE=true
