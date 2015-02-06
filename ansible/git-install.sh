@@ -39,8 +39,9 @@ function with_root {
   local SHELL_INVOCATION=$@
   if [ "$USER" = "root" ]; then
     $SHELL_INVOCATION
-  elif [ -z "$PS1" ]; then
-    # non interactive shell
+  # elif [ -z "$PS1" ]; then
+  elif [ "$(tty)" == "not a tty" ]; then
+      # non interactive shell
     sudo -n $SHELL_INVOCATION
   else
     sudo $SHELL_INVOCATION
