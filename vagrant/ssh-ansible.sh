@@ -45,15 +45,15 @@ if [ ! -z $VAGRANT_SSH_ARGS ]; then
   VAGRANT_SSH_ARGS=" -- $VAGRANT_SSH_ARGS"
 fi
 
-:: --- vagrant requires to be in the folder ---
+#  --- vagrant requires to be in the folder ---
 pushd $PROJECT_FOLDER
 
 # --- check that all vagrant machines are up ---
-vagrant status | read ; while read first second third fourth fifth; do
-  if [ ! -z $fifth ]; then
-    break
+vagrant status --machine-readable | while IFS=, read time name kind state; do
+  if [ "$kind" != "state" ]; then
+    continue
   fi
-  if [ ! "$second" == "running" ]; then
+  if [ "$state" != "running" ]; then
     vagrant up
     break
   fi
