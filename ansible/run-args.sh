@@ -35,6 +35,9 @@ set -e
 # ANSIBLE_RUN_VAGRANT
 #   flag whether vagrant should be used to invoke Ansible
 #
+# ANSIBLE_RUN_OPTIONS
+#   parsed options for the Ansible invocation
+#
 # ANSIBLE_RUN_HOSTS (default: "$ANSIBLE_HOSTS_DIR/$ANSIBLE_HOSTS_NAME")
 #   absolute path to the hosts file
 #
@@ -54,6 +57,7 @@ VAGRANT_INVOKED=${VAGRANT_INVOKED:=false}
 
 ANSIBLE_RUN_ARGS=${ANSIBLE_RUN_ARGS:=}
 ANSIBLE_RUN_VAGRANT=${ANSIBLE_RUN_VAGRANT:=false}
+ANSIBLE_RUN_OPTIONS=${ANSIBLE_RUN_OPTIONS:=}
 ANSIBLE_HOSTS_NAME=${ANSIBLE_HOSTS_NAME:=default}
 ANSIBLE_PLAYBOOK_NAME=${ANSIBLE_PLAYBOOK_NAME:=provision}
 ANSIBLE_RUN_PROVISION_ARGS=${ANSIBLE_RUN_PROVISION_ARGS:=}
@@ -66,36 +70,49 @@ function show_help {
   cmd_line="remote"
   option_lines=
   argument_lines=
+  # forget
+  option_lines="$option_lines
+    --forget       forget the remembered hosts"
   # help
   option_lines="$option_lines
-    -h|--help     show this help message"
+    -h|--help      show this help message"
+  # remember
+  option_lines="$option_lines
+    --remember     remember the hosts as the default for future runs"
+  # skip tags
+  option_lines="$option_lines
+    --skip-tags TAGS,.. run Ansible playbook without the given tags"
+  # step
+  option_lines="$option_lines
+    --step         one-step-at-a-time: confirm each task before running"
+  # syntax check
+  option_lines="$option_lines
+    --syntax-check only perform a syntax check on the playbook"
+  # tags
+  option_lines="$option_lines
+    -t|--tags TAGS,.. run Ansible playbook with given tags only"
   # vagrant
   if [ ! "$VAGRANT_INVOKED" == true ]; then
     option_lines="$option_lines
-    -v|--vagrant  use Vagrant for Ansible invocation"
+    -v|--vagrant   use Vagrant for Ansible invocation"
   fi
-  # remember
-  option_lines="$option_lines
-    --remember    remember the hosts as the default for future runs"
-  # forget
-  option_lines="$option_lines
-    --forget      forget the remembered hosts"
+
   # options
   cmd_line="$cmd_line [options]*"
   argument_lines="$argument_lines
-    options       additional options in any order. See below!"
+    options        additional options in any order. See below!"
   # hosts
   cmd_line="$cmd_line [hosts]"
   argument_lines="$argument_lines
-    hosts         hosts inventory where playbook is executed (default: ${ANSIBLE_RUN_HOSTS_NAME})"
+    hosts          hosts inventory where playbook is executed (default: ${ANSIBLE_RUN_HOSTS_NAME})"
   # playbook
-  cmd_line="$cmd_line [playbook]*"
+  cmd_line="$cmd_line [playbook]"
   argument_lines="$argument_lines
-    playbook      folder and basename of the playbook that should be executed (default: ${ANSIBLE_PLAYBOOK_NAME})"
+    playbook       folder and basename of the playbook that should be executed (default: ${ANSIBLE_PLAYBOOK_NAME})"
   # extra args
   cmd_line="$cmd_line [extra args]*"
   argument_lines="$argument_lines
-    extra args    arguments passed as PROVISION_ARGS environment variable to the playbook"
+    extra args     arguments passed as PROVISION_ARGS environment variable to the playbook"
 
   echo "$cmd_line
 
@@ -128,19 +145,33 @@ if [ "$VAGRANT_INVOKED" == true ]; then
 fi
 ANSIBLE_RUN_REMEMBER=false
 ANSIBLE_RUN_ARGS=$@
-while [ ! -z "$1" ] ; do
+while [ ! -z "$1" ]; do
   case $1 in
+  --forget)
+    remove_remember_hosts_file
+    ;;
   -h|--help)
     show_help
-    ;;
-  -v|--vagrant)
-    ANSIBLE_RUN_VAGRANT=true
     ;;
   --remember)
     ANSIBLE_RUN_REMEMBER=true
     ;;
-  --forget)
-    remove_remember_hosts_file
+  --skip-tags)
+    shift
+    ANSIBLE_RUN_OPTIONS="$ANSIBLE_RUN_OPTIONS --skip-tags=$1"
+    ;;
+  --step)
+    ANSIBLE_RUN_OPTIONS="$ANSIBLE_RUN_OPTIONS --step"
+    ;;
+  --syntax-check)
+    ANSIBLE_RUN_OPTIONS="$ANSIBLE_RUN_OPTIONS --syntax-check"
+    ;;
+  -t|--tags)
+    shift
+    ANSIBLE_RUN_OPTIONS="$ANSIBLE_RUN_OPTIONS --tags=$1"
+    ;;
+  -v|--vagrant)
+    ANSIBLE_RUN_VAGRANT=true
     ;;
   *)
     break

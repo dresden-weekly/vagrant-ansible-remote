@@ -25,6 +25,8 @@ set -e
 #
 # ANSIBLE_OPTIONS
 #   additional options for ansible
+# ANSIBLE_RUN_OPTIONS
+#   parsed options for the Ansible invocation
 # ANSIBLE_RUN_HOSTS (default: "$ANSIBLE_PROJECT_FOLDER/hosts/default")
 #   absolute path to the hosts file
 # ANSIBLE_RUN_PLAYBOOK (default: "$ANSIBLE_PROJECT_FOLDER/provision.yml")
@@ -105,5 +107,5 @@ fi
 echo -e "${GREEN}Running Ansible${NORMAL}"
 export ANSIBLE_ROLES_PATH=$ANSIBLE_ROLES_PATH
 export PROVISION_ARGS=$ANSIBLE_RUN_PROVISION_ARGS
-echo "ansible-playbook $ANSIBLE_OPTIONS $ANSIBLE_RUN_PLAYBOOK --inventory-file=$ANSIBLE_RUN_HOSTS"
-ansible-playbook $ANSIBLE_OPTIONS $ANSIBLE_RUN_PLAYBOOK --inventory-file=$ANSIBLE_RUN_HOSTS
+echo "ansible-playbook $ANSIBLE_OPTIONS $ANSIBLE_RUN_PLAYBOOK --inventory-file=$ANSIBLE_RUN_HOSTS $ANSIBLE_RUN_OPTIONS"
+ansible-playbook $ANSIBLE_OPTIONS $ANSIBLE_RUN_PLAYBOOK --inventory-file=$ANSIBLE_RUN_HOSTS $ANSIBLE_RUN_OPTIONS
