@@ -87,6 +87,7 @@ if [ ! -d $ANSIBLE_DIR ]; then
   echo -e "${GREEN}Cloning Ansible${NORMAL}"
   mkdir -p $ANSIBLE_DIR 2>/dev/null || GIT_PREFIX="with_root "
   $GIT_PREFIX git clone --recurse-submodules --branch $ANSIBLE_GIT_BRANCH --depth 1 $ANSIBLE_GIT_REPO $ANSIBLE_DIR
+  $GIT_PREFIX bash $ANSIBLE_DIR/hacking/env-setup
 fi
 
 SOURCE_ANSIBLE=true

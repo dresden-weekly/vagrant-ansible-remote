@@ -83,7 +83,9 @@ fi
 if [ "$SOURCE_ANSIBLE" == true ]; then
   echo -e "${GREEN}Using Ansible from ${ANSIBLE_DIR} v$(cat $ANSIBLE_DIR/VERSION)${NORMAL}"
   cd $ANSIBLE_DIR # switch folder otherwise vagrant folder might not work
+  set +e
   source ${ANSIBLE_DIR}/hacking/env-setup
+  set -e
 fi
 
 # --- use ansible-galaxy Rolefile ---
