@@ -43,12 +43,24 @@ if [ ! "$VAGRANT_INVOKED" == true ] && [ "$ANSIBLE_RUN_VAGRANT" == true ]; then
   exit 0
 fi
 
-# --- direct invocation ---
+# --- ansible installation ---
 if [ -s "$PROJECT_FOLDER/ansible/install.sh" ]; then
   source $PROJECT_FOLDER/ansible/install.sh
 else
   source $PROJECT_FOLDER/$VAGRANT_ANSIBLE_REMOTE/ansible/git-install.sh
 fi
+
+# --- ansible-vault invocation ---
+if [ "$ANSIBLE_RUN_VAULT" == true ]; then
+  if [ -s "$PROJECT_FOLDER/ansible/vault.sh" ]; then
+    source $PROJECT_FOLDER/ansible/vault.sh
+  else
+    source $PROJECT_FOLDER/$VAGRANT_ANSIBLE_REMOTE/ansible/vault.sh
+  fi
+  exit 0
+fi
+
+# --- ansible-playbook invocation ---
 if [ -s "$PROJECT_FOLDER/ansible/run.sh" ]; then
   source $PROJECT_FOLDER/ansible/run.sh
 else

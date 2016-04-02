@@ -57,6 +57,7 @@ VAGRANT_INVOKED=${VAGRANT_INVOKED:=false}
 
 ANSIBLE_RUN_ARGS=${ANSIBLE_RUN_ARGS:=}
 ANSIBLE_RUN_VAGRANT=${ANSIBLE_RUN_VAGRANT:=false}
+ANSIBLE_RUN_VAULT=${ANSIBLE_RUN_VAULT:=false}
 ANSIBLE_RUN_OPTIONS=${ANSIBLE_RUN_OPTIONS:=}
 ANSIBLE_HOSTS_NAME=${ANSIBLE_HOSTS_NAME:=default}
 ANSIBLE_PLAYBOOK_NAME=${ANSIBLE_PLAYBOOK_NAME:=provision}
@@ -96,6 +97,11 @@ function show_help {
     option_lines="$option_lines
     -v|--vagrant   use Vagrant for Ansible invocation"
   fi
+
+  # vault
+  cmd_line="$cmd_line [vault ...] |"
+  argument_lines="$argument_lines
+    vault ...      Invoke the ansible-vault and quit."
 
   # options
   cmd_line="$cmd_line [options]*"
@@ -145,38 +151,51 @@ if [ "$VAGRANT_INVOKED" == true ]; then
 fi
 ANSIBLE_RUN_REMEMBER=false
 ANSIBLE_RUN_ARGS=$@
-while [ ! -z "$1" ]; do
+while (($#)); do
   case $1 in
+  vault)
+    shift
+    ANSIBLE_RUN_VAULT=true
+    ANSIBLE_RUN_VAULT_ARGS="$@"
+    shift $#
+    break
+    ;;
   --forget)
     remove_remember_hosts_file
+    shift
     ;;
   -h|--help)
     show_help
     ;;
   --remember)
     ANSIBLE_RUN_REMEMBER=true
+    shift
     ;;
   --skip-tags)
     shift
     ANSIBLE_RUN_OPTIONS="$ANSIBLE_RUN_OPTIONS --skip-tags=$1"
+    shift
     ;;
   --step)
     ANSIBLE_RUN_OPTIONS="$ANSIBLE_RUN_OPTIONS --step"
+    shift
     ;;
   --syntax-check)
     ANSIBLE_RUN_OPTIONS="$ANSIBLE_RUN_OPTIONS --syntax-check"
+    shift
     ;;
   -t|--tags)
     shift
     ANSIBLE_RUN_OPTIONS="$ANSIBLE_RUN_OPTIONS --tags=$1"
+    shift
     ;;
   -v|--vagrant)
     ANSIBLE_RUN_VAGRANT=true
+    shift
     ;;
   *)
     break
   esac
-  shift
 done
 
 # hosts
