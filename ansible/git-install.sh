@@ -68,7 +68,7 @@ function apt_get_install {
 
 # --- remove mismatching version ---
 if [ -f ${ANSIBLE_DIR}/VERSION ]; then
-  if [ $(<${ANSIBLE_DIR}/VERSION) != $ANSIBLE_VERSION ]; then
+  if [ "$(<${ANSIBLE_DIR}/VERSION)" != "${ANSIBLE_VERSION}" ]; then
     echo -e "${RED}Removing old Ansible version $(<${ANSIBLE_DIR}/VERSION)${NORMAL}"
     if [ -w ${ANSIBLE_DIR} ]; then
       rm -rf ${ANSIBLE_DIR}
@@ -84,7 +84,7 @@ apt_get_install "${GREEN}Installing Ansible dependencies and Git${NORMAL}" \
 
 # --- install ---
 if [ ! -d $ANSIBLE_DIR ]; then
-  echo -e "${GREEN}Cloning Ansible${NORMAL}"
+  echo -e "${GREEN}Cloning Ansible ${ANSIBLE_VERSION}${NORMAL}"
   mkdir -p $ANSIBLE_DIR 2>/dev/null || GIT_PREFIX="with_root "
   $GIT_PREFIX git clone --recurse-submodules --branch $ANSIBLE_GIT_BRANCH --depth 1 $ANSIBLE_GIT_REPO $ANSIBLE_DIR
   $GIT_PREFIX bash $ANSIBLE_DIR/hacking/env-setup
