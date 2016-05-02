@@ -87,6 +87,7 @@ if [ "$SOURCE_ANSIBLE" == true ]; then
   source ${ANSIBLE_DIR}/hacking/env-setup
   set -e
 fi
+cd $ANSIBLE_PROJECT_FOLDER
 
 # --- use ansible-galaxy Rolefile ---
 if [ -r "${ANSIBLE_GALAXY_ROLEFILE}.yml" ]; then
