@@ -1,8 +1,5 @@
 [vagrant]
 yourapp-vm
 
-[vagrant:vars]
-ansible_connection=local
-
 [yourapp:children]
 vagrant
