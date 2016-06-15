@@ -73,29 +73,32 @@ function show_help {
   argument_lines=
   # forget
   option_lines="$option_lines
-    --forget       forget the remembered hosts"
+    --forget            forget the remembered hosts"
   # help
   option_lines="$option_lines
-    -h|--help      show this help message"
+    -h|--help           show this help message"
   # remember
   option_lines="$option_lines
-    --remember     remember the hosts as the default for future runs"
+    --remember          remember the hosts as the default for future runs"
+  # step
+  option_lines="$option_lines
+    --step              one-step-at-a-time: confirm each task before running"
+  # syntax check
+  option_lines="$option_lines
+    --syntax-check      only perform a syntax check on the playbook"
+  # tags
+  option_lines="$option_lines
+    -t|--tags TAGS,..   run Ansible playbook with given tags only"
   # skip tags
   option_lines="$option_lines
     --skip-tags TAGS,.. run Ansible playbook without the given tags"
-  # step
+  # limits
   option_lines="$option_lines
-    --step         one-step-at-a-time: confirm each task before running"
-  # syntax check
-  option_lines="$option_lines
-    --syntax-check only perform a syntax check on the playbook"
-  # tags
-  option_lines="$option_lines
-    -t|--tags TAGS,.. run Ansible playbook with given tags only"
+    -l|--limit HOSTS,.. run Ansible playbook limited to the given hosts"
   # vagrant
   if [ ! "$VAGRANT_INVOKED" == true ]; then
     option_lines="$option_lines
-    -v|--vagrant   use Vagrant for Ansible invocation"
+    -v|--vagrant        use Vagrant for Ansible invocation"
   fi
 
   # vault
@@ -187,6 +190,11 @@ while (($#)); do
   -t|--tags)
     shift
     ANSIBLE_RUN_OPTIONS="$ANSIBLE_RUN_OPTIONS --tags=$1"
+    shift
+    ;;
+  -l|--limit)
+    shift
+    ANSIBLE_RUN_OPTIONS="$ANSIBLE_RUN_OPTIONS --limit=$1"
     shift
     ;;
   -v|--vagrant)
