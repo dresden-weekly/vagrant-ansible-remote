@@ -1,5 +1,0 @@
-[vagrant]
-yourapp-vm
-
-[yourapp:children]
-vagrant
