@@ -1,0 +1,7 @@
+- hosts: yourapp
+  pre_tasks:
+  - name: debug message
+    debug:
+      msg: "Hello World"
+  # roles:
+  # - role: yourapp-provision
