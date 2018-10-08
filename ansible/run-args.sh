@@ -7,10 +7,8 @@ set -e
 #
 # ANSIBLE_PROJECT_FOLDER (default: "$(pwd)")
 #   absolute base folder for the default ansible folders
-# ANSIBLE_HOSTS_DIR (default: "$ANSIBLE_PROJECT_FOLDER/hosts")
-#   absolute folder for normal hosts files
-# ANSIBLE_VAGRANT_HOSTS_DIR (default: "$ANSIBLE_PROJECT_FOLDER/vagrant_hosts")
-#   absolute folder for vagrant hosts files
+# ANSIBLE_INVENTORY_DIR (default: "$ANSIBLE_PROJECT_FOLDER/inventory")
+#   absolute folder for hosts files
 # ANSIBLE_PLAYBOOK_DIR (default: "$ANSIBLE_PROJECT_FOLDER/plays")
 #   absolute folder for playbook files
 # VAGRANT_INVOKED (default: false)
@@ -21,7 +19,7 @@ set -e
 #   enabled by parameter option
 # ANSIBLE_HOSTS_NAME (default: "default")
 #   default relative hosts file, overriden by parameters
-#   resolved with $ANSIBLE_HOSTS_DIR or $ANSIBLE_VAGRANT_HOSTS_DIR
+#   resolved with $ANSIBLE_INVENTORY_DIR
 # ANSIBLE_PLAYBOOK_NAME (default: "provision")
 #   default relative playbook file, overriden by parameters
 #   resolved with $ANSIBLE_PROJECT_FOLDER
@@ -38,7 +36,7 @@ set -e
 # ANSIBLE_RUN_OPTIONS
 #   parsed options for the Ansible invocation
 #
-# ANSIBLE_RUN_HOSTS (default: "$ANSIBLE_HOSTS_DIR/$ANSIBLE_HOSTS_NAME")
+# ANSIBLE_RUN_HOSTS (default: "$ANSIBLE_INVENTORY_DIR/$ANSIBLE_HOSTS_NAME")
 #   absolute path to the hosts file
 #
 # ANSIBLE_RUN_PLAYBOOK (default: "$ANSIBLE_PLAYBOOK_DIR/$ANSIBLE_PLAYBOOK_NAME.yml")
@@ -49,8 +47,7 @@ set -e
 
 # --- defaults for configuration options ---
 ANSIBLE_PROJECT_FOLDER=${ANSIBLE_PROJECT_FOLDER:=$(pwd)}
-ANSIBLE_HOSTS_DIR=${ANSIBLE_RUN_HOSTS:=$ANSIBLE_PROJECT_FOLDER/hosts}
-ANSIBLE_VAGRANT_HOSTS_DIR=${ANSIBLE_VAGRANT_HOSTS_DIR:=$ANSIBLE_PROJECT_FOLDER/vagrant_hosts}
+ANSIBLE_INVENTORY_DIR=${ANSIBLE_RUN_HOSTS:=$ANSIBLE_PROJECT_FOLDER/inventory}
 ANSIBLE_PLAYBOOK_DIR=${ANSIBLE_PLAYBOOK_DIR:=$ANSIBLE_PROJECT_FOLDER/plays}
 ANSIBLE_REMEMBER_HOSTS_FILE=${ANSIBLE_REMEMBER_HOSTS_FILE:=$ANSIBLE_PROJECT_FOLDER/.remember}
 VAGRANT_INVOKED=${VAGRANT_INVOKED:=false}
@@ -208,14 +205,9 @@ done
 
 # hosts
 if [ ! -z "$1" ] ; then
-  if [ ! "$ANSIBLE_RUN_VAGRANT" == true ] && [ -s "$ANSIBLE_HOSTS_DIR/$1" ]; then
+  if [ -s "$ANSIBLE_INVENTORY_DIR/$1" ]; then
     ANSIBLE_RUN_HOSTS_NAME=$1
     echo -e "${GREEN}Hosts:${NORMAL} $ANSIBLE_RUN_HOSTS_NAME"
-    shift
-  elif [ -s "$ANSIBLE_VAGRANT_HOSTS_DIR/$1" ]; then
-    ANSIBLE_RUN_VAGRANT=true
-    ANSIBLE_RUN_HOSTS_NAME=$1
-    echo -e "${GREEN}Hosts though Vagrant:${NORMAL} $ANSIBLE_RUN_HOSTS_NAME"
     shift
   fi
 fi
@@ -226,11 +218,7 @@ if [ "$ANSIBLE_REMEMBERED_HOSTS_NAME" != "$ANSIBLE_HOSTS_NAME" ] && [ "$ANSIBLE_
     echo -e "${GREEN}Remembered Hosts:${NORMAL} $ANSIBLE_RUN_HOSTS_NAME"
   fi
 fi
-if [ "$ANSIBLE_RUN_VAGRANT" == true ]; then
-  ANSIBLE_RUN_HOSTS=$ANSIBLE_VAGRANT_HOSTS_DIR/$ANSIBLE_RUN_HOSTS_NAME
-else
-  ANSIBLE_RUN_HOSTS=$ANSIBLE_HOSTS_DIR/$ANSIBLE_RUN_HOSTS_NAME
-fi
+ANSIBLE_RUN_HOSTS=$ANSIBLE_INVENTORY_DIR/$ANSIBLE_RUN_HOSTS_NAME
 if [ "$ANSIBLE_RUN_REMEMBER" == true ]; then
   echo $ANSIBLE_RUN_HOSTS_NAME>$ANSIBLE_REMEMBER_HOSTS_FILE
   echo -e "${GREEN}Will remember hosts:${NORMAL} $ANSIBLE_RUN_HOSTS_NAME"
