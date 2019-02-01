@@ -9,12 +9,12 @@ set -e
 #   absolute base folder for the default ansible folders
 # ANSIBLE_DIR (default: "/opt/ansible")
 #   absolute folder path for the custom Ansible installation
-# ANSIBLE_VERSION (default: "1.8.2" - the latest)
+# ANSIBLE_VERSION (default: "2.7.6" - the latest)
 #   Version of Ansible that is used
 #   Should match the content of the VERSION file or Ansible will be reinstalled
 # ANSIBLE_GIT_REPO (default: "git://github.com/ansible/ansible.git")
 #   Git repository to use
-# ANSIBLE_GIT_BRANCH (default: "release$ANSIBLE_VERSION")
+# ANSIBLE_GIT_BRANCH (default: "v$ANSIBLE_VERSION")
 #   Git branch of the Ansible repository
 #
 # outputs/changes
@@ -25,9 +25,9 @@ set -e
 # --- configuration defaults ---
 ANSIBLE_PROJECT_FOLDER=${ANSIBLE_PROJECT_FOLDER:=$(pwd)}
 ANSIBLE_DIR=${ANSIBLE_DIR:=/opt/ansible}
-ANSIBLE_VERSION=${ANSIBLE_VERSION:=1.8.2}
+ANSIBLE_VERSION=${ANSIBLE_VERSION:=2.7.6}
 ANSIBLE_GIT_REPO=${ANSIBLE_GIT_REPO:=git://github.com/ansible/ansible.git}
-ANSIBLE_GIT_BRANCH=${ANSIBLE_GIT_BRANCH:=release$ANSIBLE_VERSION}
+ANSIBLE_GIT_BRANCH=${ANSIBLE_GIT_BRANCH:=v$ANSIBLE_VERSION}
 
 # --- constants ---
 RED='\033[0;31m'
