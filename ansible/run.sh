@@ -80,8 +80,14 @@ if [ -x "$ANSIBLE_RUN_HOSTS" ]; then
 fi
 
 # --- use non system Ansible ---
-if [ "$SOURCE_ANSIBLE" == true ]; then
-  echo -e "${GREEN}Using Ansible from ${ANSIBLE_DIR} v$(cat $ANSIBLE_DIR/VERSION)${NORMAL}"
+if [ "$SOURCE_ANSIBLE" == true ]; then # TODO fix me if VERSION does not exist
+  if [ -f ${ANSIBLE_DIR}/VERSION ]; then
+    ANSIBLE_SRC_VERSION=$(cat $ANSIBLE_DIR/VERSION)
+  elif [ -f ${ANSIBLE_DIR}/lib/ansible/release.py  ]; then
+    ANSIBLE_SRC_VERSION=$(cat ${ANSIBLE_DIR}/lib/ansible/release.py | sed -rn "s/__version__ = '(.+)'/\1/p")
+  fi
+
+  echo -e "${GREEN}Using Ansible from ${ANSIBLE_DIR} v${ANSIBLE_SRC_VERSION}${NORMAL}"
   cd $ANSIBLE_DIR # switch folder otherwise vagrant folder might not work
   set +e
   source ${ANSIBLE_DIR}/hacking/env-setup
