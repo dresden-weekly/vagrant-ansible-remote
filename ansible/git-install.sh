@@ -66,21 +66,31 @@ function apt_get_install {
   fi
 }
 
+function remove_old_version {
+  local VERSION=$1
+  echo -e "${RED}Removing old Ansible version ${VERSION}${NORMAL}"
+  if [ -w ${ANSIBLE_DIR} ]; then
+    rm -rf ${ANSIBLE_DIR}
+  else
+    with_root rm -rf ${ANSIBLE_DIR}
+  fi
+}
+
 # --- remove mismatching version ---
 if [ -f ${ANSIBLE_DIR}/VERSION ]; then
   if [ "$(<${ANSIBLE_DIR}/VERSION)" != "${ANSIBLE_VERSION}" ]; then
-    echo -e "${RED}Removing old Ansible version $(<${ANSIBLE_DIR}/VERSION)${NORMAL}"
-    if [ -w ${ANSIBLE_DIR} ]; then
-      rm -rf ${ANSIBLE_DIR}
-    else
-      with_root rm -rf ${ANSIBLE_DIR}
-    fi
+    remove_old_version "$(<${ANSIBLE_DIR}/VERSION)"
+  fi
+elif [ -f ${ANSIBLE_DIR}/lib/ansible/release.py ]; then
+  CURRENT_ANSIBLE_VERSION=$(cat ${ANSIBLE_DIR}/lib/ansible/release.py | sed -rn "s/__version__ = '(.+)'/\1/p")
+  if [ "${CURRENT_ANSIBLE_VERSION}" != "${ANSIBLE_VERSION}" ]; then
+    remove_old_version "${CURRENT_ANSIBLE_VERSION}"
   fi
 fi
 
 # --- dependencies ---
 apt_get_install "${GREEN}Installing Ansible dependencies and Git${NORMAL}" \
-                git python-yaml python-paramiko python-jinja2 sshpass
+                git python-yaml python-paramiko python-jinja2 python-setuptools sshpass
 
 # --- install ---
 if [ ! -d $ANSIBLE_DIR ]; then
