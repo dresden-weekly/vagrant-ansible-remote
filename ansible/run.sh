@@ -80,7 +80,7 @@ if [ -x "$ANSIBLE_RUN_HOSTS" ]; then
 fi
 
 # --- use non system Ansible ---
-if [ "$SOURCE_ANSIBLE" == true ]; then # TODO fix me if VERSION does not exist
+if [ "$SOURCE_ANSIBLE" == true ]; then
   if [ -f ${ANSIBLE_DIR}/VERSION ]; then
     ANSIBLE_SRC_VERSION=$(cat $ANSIBLE_DIR/VERSION)
   elif [ -f ${ANSIBLE_DIR}/lib/ansible/release.py  ]; then
