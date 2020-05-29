@@ -69,11 +69,7 @@ function apt_get_install {
 function remove_old_version {
   local VERSION=$1
   echo -e "${RED}Removing old Ansible version ${VERSION}${NORMAL}"
-  if [ -w ${ANSIBLE_DIR} ]; then
-    rm -rf ${ANSIBLE_DIR}
-  else
-    with_root rm -rf ${ANSIBLE_DIR}
-  fi
+  with_root rm -rf ${ANSIBLE_DIR}
 }
 
 # --- remove mismatching version ---
@@ -95,9 +91,10 @@ apt_get_install "${GREEN}Installing Ansible dependencies and Git${NORMAL}" \
 # --- install ---
 if [ ! -d $ANSIBLE_DIR ]; then
   echo -e "${GREEN}Cloning Ansible ${ANSIBLE_VERSION}${NORMAL}"
-  mkdir -p $ANSIBLE_DIR 2>/dev/null || GIT_PREFIX="with_root "
-  $GIT_PREFIX git clone --recurse-submodules --branch $ANSIBLE_GIT_BRANCH --depth 1 $ANSIBLE_GIT_REPO $ANSIBLE_DIR
-  $GIT_PREFIX bash $ANSIBLE_DIR/hacking/env-setup
+  with_root mkdir -p $ANSIBLE_DIR
+  with_root chown ${USER}:${USER} $ANSIBLE_DIR
+  git clone --recurse-submodules --branch $ANSIBLE_GIT_BRANCH --depth 1 $ANSIBLE_GIT_REPO $ANSIBLE_DIR
+  bash $ANSIBLE_DIR/hacking/env-setup
 fi
 
 SOURCE_ANSIBLE=true
