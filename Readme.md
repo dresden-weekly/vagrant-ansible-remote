@@ -13,7 +13,7 @@ A collection of common scripts used to run Ansible everywhere
 
 This project contains a set of generic and very configurable scripts that help with all these steps.
 
-Your project simply contains a "remote"-script. This script is very will install the right version of Ansible where you want it. It will also launch Vagrant virtual machines if necessary.
+Your project simply contains a "remote"-script. This script is very will install the right version of Ansible where you want it. It will also launch Vagrant virtual machine or use Docker if necessary.
 
 ## Prerequisites
 
@@ -24,6 +24,12 @@ Your project simply contains a "remote"-script. This script is very will install
     vagrant plugin install vagrant-hostmanager
     ```
 
+or
+
+1. Docker
+    * On Windows ensure that you mount without execution rights.
+      Add 'umask=22,fmask=111' to automount options in wsl$://etc/wsl.cnf.
+      See [blogpost](https://devblogs.microsoft.com/commandline/chmod-chown-wsl-improvements/).
 
 ## Project Creation
 
@@ -36,6 +42,10 @@ Your project simply contains a "remote"-script. This script is very will install
     ```bash
     git submodule add https://github.com/dresden-weekly/vagrant-ansible-remote
     ```
+
+1. Configure and adapt
+    * look at the copied files
+    * create a .remote.xy from the given examples if necessary
 
 1. Test your project setup with vagrant
     ```bash

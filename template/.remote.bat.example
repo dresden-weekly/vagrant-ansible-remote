@@ -1,0 +1,8 @@
+@echo off
+
+::   Select method
+::set "REMOTE_TYPE=docker-run"
+set "REMOTE_TYPE=vagrant-ssh"
+
+::   Customize to your local system
+set "DOCKER_MOUNT_ARGS=--mount src=%HOME%\.ssh,target=/root/.ssh,type=bind %DOCKER_MOUNT_ARGS%"

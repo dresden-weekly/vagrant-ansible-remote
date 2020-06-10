@@ -3,7 +3,7 @@
 :: configuration options
 :: =====================
 ::
-:: PROJECT_FOLDER (default: "$(pwd)")
+:: PROJECT_FOLDER (default: "%CD%")
 ::   Absolute path of the Project (containing the Vagrantfile)
 :: VAGRANT_ANSIBLE_REMOTE (default: "vagrant_ansible_remote")
 ::   Relative path of vagrant-ansible-remote to the project
@@ -14,6 +14,9 @@ if not defined PROJECT_FOLDER (
 )
 if not defined VAGRANT_ANSIBLE_REMOTE (
   set "VAGRANT_ANSIBLE_REMOTE=vagrant_ansible_remote"
+)
+if not defined REMOTE_TYPE (
+  set "REMOTE_TYPE=vagrant-ssh"
 )
 
 :: --- constants ---
@@ -39,5 +42,16 @@ if not exist "%PROJECT_FOLDER%/%VAGRANT_ANSIBLE_REMOTE%" (
   exit 21
 )
 
-:: Windows cannot run Ansible therefore we use Vagrant
-call "%PROJECT_FOLDER%/%VAGRANT_ANSIBLE_REMOTE%/vagrant/ssh-ansible.bat" %*
+:: --- load customiztion ---
+if exist "%PROJECT_FOLDER%/.remote.bat" (
+  call "%PROJECT_FOLDER%/.remote.bat"
+)
+
+:: Windows cannot run Ansible therefore we use 
+if "%REMOTE_TYPE%" == "vagrant-ssh" (
+  call "%PROJECT_FOLDER%/%VAGRANT_ANSIBLE_REMOTE%/vagrant/ssh-ansible.bat" %*
+) else if "%REMOTE_TYPE%" == "docker-run" (
+  call "%PROJECT_FOLDER%/%VAGRANT_ANSIBLE_REMOTE%/docker/run-ansible.bat" %*
+) else (
+  echo "%RED%REMOTE_TYPE%NORMAL% is not valid (%REMOTE_TYPE%)"
+)

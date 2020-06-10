@@ -19,6 +19,7 @@ PROJECT_FOLDER=${PROJECT_FOLDER:=$(pwd)}
 VAGRANT_ANSIBLE_REMOTE=${VAGRANT_ANSIBLE_REMOTE:=vagrant_ansible_remote}
 ANSIBLE_PROJECT_FOLDER=${ANSIBLE_PROJECT_FOLDER:=$PROJECT_FOLDER/ansible}
 VAGRANT_INVOKED=${VAGRANT_INVOKED:=false}
+DOCKER_INVOKED=${DOCKER_INVOKED:=false}
 
 # --- contstants ---
 RED='\033[0;31m'
@@ -38,16 +39,18 @@ fi
 source $PROJECT_FOLDER/$VAGRANT_ANSIBLE_REMOTE/ansible/run-args.sh
 
 # --- vagrant invocation ---
-if [ ! "$VAGRANT_INVOKED" == true ] && [ "$ANSIBLE_RUN_VAGRANT" == true ]; then
+if [ ! "$DOCKER_INVOKED" == true ] && [ ! "$VAGRANT_INVOKED" == true ] && [ "$ANSIBLE_RUN_VAGRANT" == true ]; then
   source $PROJECT_FOLDER/$VAGRANT_ANSIBLE_REMOTE/vagrant/ssh-ansible.sh
   exit 0
 fi
 
 # --- ansible installation ---
-if [ -s "$PROJECT_FOLDER/ansible/install.sh" ]; then
-  source $PROJECT_FOLDER/ansible/install.sh
-else
-  source $PROJECT_FOLDER/$VAGRANT_ANSIBLE_REMOTE/ansible/git-install.sh
+if [ ! "$DOCKER_INVOKED" == true ]; then
+  if [ -s "$PROJECT_FOLDER/ansible/install.sh" ]; then
+    source $PROJECT_FOLDER/ansible/install.sh
+  else
+    source $PROJECT_FOLDER/$VAGRANT_ANSIBLE_REMOTE/ansible/git-install.sh
+  fi
 fi
 
 # --- ansible-vault invocation ---
