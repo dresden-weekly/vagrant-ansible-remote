@@ -1,0 +1,6 @@
+.vagrant
+.vagrant-file.rb
+.remote.bat
+ansible/.ansible/
+ansible/.roles/
+ansible/.remember
