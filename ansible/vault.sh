@@ -24,7 +24,9 @@ SOURCE_ANSIBLE=${SOURCE_ANSIBLE:=false}
 ANSIBLE_DIR=${ANSIBLE_DIR:=$ANSIBLE_PROJECT_FOLDER/.ansible}
 
 # --- parameter defaults ---
-ANSIBLE_RUN_VAULT_ARGS=${ANSIBLE_RUN_VAULT_ARGS:=}
+if [ -z ANSIBLE_RUN_VAULT_ARGS ]; then
+  ANSIBLE_RUN_VAULT_ARGS=""
+fi
 
 # --- constants ---
 RED='\033[0;31m'
