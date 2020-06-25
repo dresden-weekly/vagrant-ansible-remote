@@ -17,6 +17,8 @@ set -e
 #   default provision arguments, overriden by parameters
 # ANSIBLE_RUN_VAGRANT (default: false)
 #   enabled by parameter option
+# ANSIBLE_RUN_DOCKER (default: false)
+#   enabled by parameter option
 # ANSIBLE_HOSTS_NAME (default: "default")
 #   default relative hosts file, overriden by parameters
 #   resolved with $ANSIBLE_INVENTORY_DIR
@@ -32,6 +34,9 @@ set -e
 #
 # ANSIBLE_RUN_VAGRANT
 #   flag whether vagrant should be used to invoke Ansible
+#
+# ANSIBLE_RUN_DOCKER
+#   flag whether docker should be used to invoke Ansible
 #
 # ANSIBLE_RUN_OPTIONS
 #   parsed options for the Ansible invocation
@@ -51,11 +56,13 @@ ANSIBLE_INVENTORY_DIR=${ANSIBLE_RUN_HOSTS:=$ANSIBLE_PROJECT_FOLDER/inventory}
 ANSIBLE_PLAYBOOK_DIR=${ANSIBLE_PLAYBOOK_DIR:=$ANSIBLE_PROJECT_FOLDER/plays}
 ANSIBLE_REMEMBER_HOSTS_FILE=${ANSIBLE_REMEMBER_HOSTS_FILE:=$ANSIBLE_PROJECT_FOLDER/.remember}
 VAGRANT_INVOKED=${VAGRANT_INVOKED:=false}
+DOCKER_INVOKED=${DOCKER_INVOKED:=false}
 
 if [ -z ANSIBLE_RUN_ARGS ]; then
   ANSIBLE_RUN_ARGS=""
 fi
 ANSIBLE_RUN_VAGRANT=${ANSIBLE_RUN_VAGRANT:=false}
+ANSIBLE_RUN_DOCKER=${ANSIBLE_RUN_DOCKER:=false}
 ANSIBLE_RUN_VAULT=${ANSIBLE_RUN_VAULT:=false}
 if [ -z ANSIBLE_RUN_OPTIONS ]; then
   ANSIBLE_RUN_OPTIONS=""
@@ -102,6 +109,11 @@ function show_help {
   if [ ! "$VAGRANT_INVOKED" == true ]; then
     option_lines="$option_lines
     -v|--vagrant        use Vagrant for Ansible invocation"
+  fi
+  # docker
+  if [ ! "$DOCKER_INVOKED" == true ]; then
+    option_lines="$option_lines
+    -d|--docker         use Docker for Ansible invocation"
   fi
 
   # vault
@@ -155,6 +167,9 @@ fi
 if [ "$VAGRANT_INVOKED" == true ]; then
   ANSIBLE_RUN_VAGRANT=true
 fi
+if [ "$DOCKER_INVOKED" == true ]; then
+  ANSIBLE_RUN_DOCKER=true
+fi
 ANSIBLE_RUN_REMEMBER=false
 ANSIBLE_RUN_ARGS=$@
 while (($#)); do
@@ -204,6 +219,10 @@ while (($#)); do
     ANSIBLE_RUN_VAGRANT=true
     shift
     ;;
+  -d|--docker)
+    ANSIBLE_RUN_DOCKER=true
+    shift
+    ;;
   *)
     break
   esac
@@ -220,6 +239,8 @@ fi
 if [ "$ANSIBLE_REMEMBERED_HOSTS_NAME" != "$ANSIBLE_HOSTS_NAME" ] && [ "$ANSIBLE_RUN_HOSTS_NAME" == "$ANSIBLE_REMEMBERED_HOSTS_NAME" ]; then
   if [ "$ANSIBLE_RUN_VAGRANT" == true ]; then
     echo -e "${GREEN}Remembered Hosts though Vagrant:${NORMAL} $ANSIBLE_RUN_HOSTS_NAME"
+  elif [ "$ANSIBLE_RUN_DOCKER" == true ]; then
+    echo -e "${GREEN}Remembered Hosts though Docker:${NORMAL} $ANSIBLE_RUN_HOSTS_NAME"
   else
     echo -e "${GREEN}Remembered Hosts:${NORMAL} $ANSIBLE_RUN_HOSTS_NAME"
   fi

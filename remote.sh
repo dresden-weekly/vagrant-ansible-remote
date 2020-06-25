@@ -44,6 +44,12 @@ if [ ! "$DOCKER_INVOKED" == true ] && [ ! "$VAGRANT_INVOKED" == true ] && [ "$AN
   exit 0
 fi
 
+# --- docker invocation ---
+if [ ! "$DOCKER_INVOKED" == true ] && [ ! "$VAGRANT_INVOKED" == true ] && [ "$ANSIBLE_RUN_DOCKER" == true ]; then
+  source $PROJECT_FOLDER/$VAGRANT_ANSIBLE_REMOTE/docker/run-ansible.sh
+  exit 0
+fi
+
 # --- ansible installation ---
 if [ ! "$DOCKER_INVOKED" == true ]; then
   if [ -s "$PROJECT_FOLDER/ansible/install.sh" ]; then
