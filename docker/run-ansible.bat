@@ -6,7 +6,7 @@ SETLOCAL ENABLEEXTENSIONS
 ::
 :: PROJECT_FOLDER (default: "%CD%")
 ::   Absolute path of the Project
-:: DOCKER_ANSIBLE_IMAGE (default: "ansible:latest")
+:: DOCKER_ANSIBLE_IMAGE (default: "hnhs/ansible-2.5.4:latest")
 ::   Docker image name that has Ansible installed
 :: VAGRANT_PROJECT_MOUNT (default: "/vagrant")
 ::   Where is the project mounted into the docker container
@@ -27,7 +27,7 @@ if not defined PROJECT_FOLDER (
   set "PROJECT_FOLDER=%CD%"
 )
 if not defined DOCKER_ANSIBLE_IMAGE (
-  set "DOCKER_ANSIBLE_IMAGE=ansible:latest"
+  set "DOCKER_ANSIBLE_IMAGE=hnhs/ansible-2.5.4:latest"
 )
 if not defined VAGRANT_PROJECT_MOUNT (
   set "VAGRANT_PROJECT_MOUNT=/ansible"

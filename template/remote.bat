@@ -19,7 +19,7 @@ if not defined VAGRANT_ANSIBLE_MACHINE (
 
 ::   Docker image with Ansible installed
 if not defined DOCKER_IMAGE (
-  set "DOCKER_IMAGE=ansible:2.5.4"
+  set "DOCKER_IMAGE=hnhs/ansible-2.5.4:latest"
 )
 
 ::   Transfer some environment variables
