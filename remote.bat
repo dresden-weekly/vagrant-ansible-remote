@@ -42,12 +42,12 @@ if not exist "%PROJECT_FOLDER%/%VAGRANT_ANSIBLE_REMOTE%" (
   exit 21
 )
 
-:: --- load customiztion ---
+:: --- load customization ---
 if exist "%PROJECT_FOLDER%/.remote.bat" (
   call "%PROJECT_FOLDER%/.remote.bat"
 )
 
-:: Windows cannot run Ansible therefore we use 
+:: Windows cannot run Ansible therefore we use
 if "%REMOTE_TYPE%" == "vagrant-ssh" (
   call "%PROJECT_FOLDER%/%VAGRANT_ANSIBLE_REMOTE%/vagrant/ssh-ansible.bat" %*
 ) else if "%REMOTE_TYPE%" == "docker-run" (

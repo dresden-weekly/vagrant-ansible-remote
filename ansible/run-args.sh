@@ -232,7 +232,15 @@ done
 if [ ! -z "$1" ] ; then
   if [ -s "$ANSIBLE_INVENTORY_DIR/$1" ]; then
     ANSIBLE_RUN_HOSTS_NAME=$1
-    echo -e "${GREEN}Hosts:${NORMAL} $ANSIBLE_RUN_HOSTS_NAME"
+    if [ ! "$DOCKER_INVOKED" == true ] && [ ! "$VAGRANT_INVOKED" == true ]; then
+      echo -e "${GREEN}Hosts:${NORMAL} inventory/$ANSIBLE_RUN_HOSTS_NAME"
+    fi
+    shift
+  elif [ -s "$ANSIBLE_INVENTORY_DIR/$1.yml" ]; then
+    ANSIBLE_RUN_HOSTS_NAME=$1.yml
+    if [ ! "$DOCKER_INVOKED" == true ] && [ ! "$VAGRANT_INVOKED" == true ]; then
+      echo -e "${GREEN}Hosts:${NORMAL} inventory/$ANSIBLE_RUN_HOSTS_NAME"
+    fi
     shift
   fi
 fi
@@ -259,10 +267,14 @@ while [ ! -z "$1" ] && [ -d "$ANSIBLE_PLAYBOOK_DIR$ANSIBLE_RUN_PLAYBOOK_FOLDER/$
 done
 if [ ! -z "$1" ] && [ -s "$ANSIBLE_PLAYBOOK_DIR$ANSIBLE_RUN_PLAYBOOK_FOLDER/$1.yml" ]; then
   ANSIBLE_PLAYBOOK_NAME=$1
-  echo -e "${GREEN}Action:${NORMAL} $ANSIBLE_RUN_PLAYBOOK_FOLDER/$ANSIBLE_PLAYBOOK_NAME"
+  if [ ! "$DOCKER_INVOKED" == true ] && [ ! "$VAGRANT_INVOKED" == true ]; then
+    echo -e "${GREEN}Action:${NORMAL} plays$ANSIBLE_RUN_PLAYBOOK_FOLDER/$ANSIBLE_PLAYBOOK_NAME.yml"
+  fi
   shift
 elif [ ! -z "$ANSIBLE_RUN_PLAYBOOK_FOLDER" ]; then
-  echo -e "${GREEN}Action:${NORMAL} $ANSIBLE_RUN_PLAYBOOK_FOLDER/$ANSIBLE_PLAYBOOK_NAME"
+  if [ ! "$DOCKER_INVOKED" == true ] && [ ! "$VAGRANT_INVOKED" == true ]; then
+    echo -e "${GREEN}Action:${NORMAL} plays$ANSIBLE_RUN_PLAYBOOK_FOLDER/$ANSIBLE_PLAYBOOK_NAME.yml"
+  fi
 fi
 ANSIBLE_RUN_PLAYBOOK="$ANSIBLE_PLAYBOOK_DIR$ANSIBLE_RUN_PLAYBOOK_FOLDER/$ANSIBLE_PLAYBOOK_NAME.yml"
 

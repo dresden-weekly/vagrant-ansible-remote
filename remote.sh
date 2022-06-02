@@ -35,6 +35,11 @@ if [ -z "$VAGRANT_ANSIBLE_REMOTE" ] || [ ! -d "$PROJECT_FOLDER/$VAGRANT_ANSIBLE_
   exit 21
 fi
 
+# --- load customization ---
+if [ -f "$PROJECT_FOLDER/.remote.sh" ]; then
+  source "$PROJECT_FOLDER/.remote.sh"
+fi
+
 # --- resolve arguments ---
 source $PROJECT_FOLDER/$VAGRANT_ANSIBLE_REMOTE/ansible/run-args.sh
 
